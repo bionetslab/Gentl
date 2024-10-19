@@ -1,3 +1,10 @@
+![Gentl](/gentl-icon.jpeg)
+
+# Gentl
+The source code for Gentl (<ins>Gen</ins>e<ins>t</ins>ic a<ins>l</ins>gorithm for predicting stage and grade from medical scans of patients with cancer) [[access preprint](doi-when-available)].
+
+<!------------------>
+
 # About
 
 This is a repository that contains information on how to reproduce results corresponding to the *cutaneous T cell lymphoma (CTCL)* case study reported in [Spatial cell graph analysis reveals skin tissue organization characteristic for cutaneous T cell lymphoma](https://paper-doi-when-available).
