@@ -1,7 +1,7 @@
 ![Gentl](/gentl-icon.jpeg)
 
 # Gentl
-The source code for Gentl ( **<ins>Gen</ins>** e**<ins>t</ins>**ic a**<ins>l</ins>**gorithm for predicting stage and grade from medical scans of patients with cancer) [[access preprint](doi-when-available)].
+The source code for Gentl ( **Gen** e**t**ic a**<ins>l</ins>**gorithm for predicting stage and grade from medical scans of patients with cancer) [[access preprint](doi-when-available)].
 
 <!------------------>
 
