@@ -1,4 +1,5 @@
 import random
+from _ga_step1_initialize_population_ import _ga_step1_initialize_population_
 
 def gentl(p, Np_cap, alpha, goal, g, copy=True):
     """Saves i) list of lists as 2D np.array (np.array(list_of_lists)), ii) scores
@@ -31,3 +32,7 @@ def gentl(p, Np_cap, alpha, goal, g, copy=True):
 
     """
     
+    p=_ga_step1_initialize_population_(goal, Np_cap, g)
+    
+    for p_ in p:
+        
