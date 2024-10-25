@@ -1,13 +1,13 @@
 import numpy as np
 from scipy.spatial import distance
 
-def minkowski_distance(goal, chromosome): # p-norm distance
-    # write your code here
-    return dist
+# def minkowski_distance(goal, chromosome): # p-norm distance
+#     # write your code here
+#     return dist
 
-def manhattan_distance(goal, chromosome): # L1-norm distance
-    # write your code here
-    return dist
+# def manhattan_distance(goal, chromosome): # L1-norm distance
+#     # write your code here
+#     return dist
 
 def euclidean_distance(goal, chromosome): # L2-norm distance
     """

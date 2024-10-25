@@ -1,11 +1,12 @@
 import numpy as np
 from _ga_step1_initialize_population_ import _ga_step1_initialize_population_
+from _ga_step1_initialize_population_ import _ga_step1_initialize_population_randomly_
 from _ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance, parent_selection_fitness_evaluation
 from _ga_step3_crossover import crossover
 from _ga_step4_mutation import mutate
 from _ga_step5_replacement import replace
 
-def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=1.0):
+def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=1.0, mu=None, Np_initial=None):
     """Saves i) list of lists as 2D np.array (np.array(list_of_lists)), ii) scores
     OR
     returns i) list of lists, ii) scores.
@@ -35,10 +36,19 @@ def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_th
     Size of a chromosome (that is, number of genes contained in a chromosome) is constant across all individuals.
 
     """
+    if mu==None or mu==1:
+        mu='1'
+    elif mu==2 or mu=='random':
+        mu='2'
+    if mu=='2':
+        # Step 1: Initialize population
+        population = _ga_step1_initialize_population_randomly_(goal, Np_cap, g)
+    elif mu=='1':
+        # Step 1: Initialize population
+        population = _ga_step1_initialize_population_(goal, Np_cap, g)
 
-    # Step 1: Initialize population
-    population = _ga_step1_initialize_population_(goal, Np_cap, g)
-
+        
+    
     for generation in range(max_generations):
         # Step 2: Evaluate fitness and select parents
         parents = parent_selection_fitness_evaluation(goal, population)
