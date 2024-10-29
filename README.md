@@ -1,4 +1,4 @@
-![Gentl](/gentl-icon.jpeg)
+![Gentl](Gentl-icon.jpeg)
 
 # Gentl
 The source code for Gentl (GENeTic aLgorithm for predicting stage and grade from medical scans of patients with cancer) [[access preprint](doi-when-available)].
