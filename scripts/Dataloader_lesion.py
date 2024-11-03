@@ -118,13 +118,18 @@ class BladderCancerROIDataset(Dataset):
                 self.overlap, self.max_rois_per_image
                 )
 
-            for roi in rois:
+            for roi_idx, (roi, coordinates, neighbors) in enumerate(
+                    rois
+                    ):  # store index,roi,coordinates and neighbors of each roi
                 roi_samples.append(
                     {
+                        'index': f"{roi_idx}-{sample['ct_folder']}",  # combine index and folder eg: (0-CT-009)
                         'roi': roi,
-                        'time_point': sample['time_point'],
-                        'ct_folder': sample['ct_folder'],
-                        'case_type': sample['case_type']
+                        'coordinates': coordinates,  # coordinates of each roi
+                        'neighbors': neighbors,  # neighbors of each roi {neighbor:(distance,coordinates)}
+                        'time_point': sample['time_point'],  # cancer type eg :T0,T1+
+                        'ct_folder': sample['ct_folder'],  # folder name eg: CT-009
+                        'case_type': sample['case_type']  # Lesion
                         }
                     )
 
@@ -140,7 +145,10 @@ class BladderCancerROIDataset(Dataset):
         roi_tensor = torch.from_numpy(sample['roi']).float().unsqueeze(0)
 
         return {
+            'index': sample['index'],  # non cancer roi index
             'image': roi_tensor,  # non cancer roi
+            'coordinates': sample['coordinates'],  # coordinates of each roi
+            'neighbors': sample['neighbors'],  # neighbors of each roi
             'time_point': sample['time_point'],  # cancer stage
             'ct_folder': sample['ct_folder'],  # folder name
             'case_type': sample['case_type']  # lesion
@@ -264,16 +272,26 @@ def visualize_dataset(dataset, num_samples=4):
 base_dataset = BladderCancerDataset(
     root_dir=r'C:\Users\vinee\OneDrive\Desktop\Project_Gentl\Gentl\data\original\Al-Bladder Cancer'
     )
+roi_per_image = 5
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
     roi_width=128,
     roi_height=128,
     overlap=0.25,
-    max_rois_per_image=10
+    max_rois_per_image=roi_per_image
     )
 
 print(f'Total lesion CT images in the dataset {len(base_dataset)}')
 print(f"Total roi's from the lesion data {len(roi_dataset)}  \n")
+
+# Write roi to the file output_dataloader.txt
+with open("output_dataloader.txt", 'w') as file:
+    file.write(f"Number of images:{len(base_dataset)}\nNumber of regions per image:{roi_per_image}\n "
+               f"Total number of roi's:{len(base_dataset)*roi_per_image}\n")
+    for roi in roi_dataset:
+        print(roi)
+        file.write(f"{roi}\n")
+
 
 # print(roi_dataset) # returns 100 for 100 images and one ROI per image
 
