@@ -1,12 +1,11 @@
 import numpy as np
-from _ga_step1_initialize_population_ import _ga_step1_initialize_population_
-from _ga_step1_initialize_population_ import _ga_step1_initialize_population_randomly_
-from _ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance, parent_selection_fitness_evaluation
-from _ga_step3_crossover import crossover
-from _ga_step4_mutation import mutate
-from _ga_step5_replacement import replace
+from gentl._ga_step1_initialize_population_ import _ga_step1_initialize_population_randomly_
+from gentl._ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance, parent_selection_fitness_evaluation
+from gentl._ga_step3_crossover import crossover
+from gentl._ga_step4_mutation import mutate
+from gentl._ga_step5_replacement import replace
 
-def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=1.0, mu=None, Np_initial=None):
+def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=1.0, mu=None, Np_initial=None, p=[]):
     """Saves i) list of lists as 2D np.array (np.array(list_of_lists)), ii) scores
     OR
     returns i) list of lists, ii) scores.
@@ -15,7 +14,7 @@ def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_th
     ----------
     p: Initial population # Np = len(p) : # of individuals in population during initialization (or, # of chromosomes - one chromosome per individual) [Note that $Np$ is different from actual population $p = list_of_chromosomes_during_initialization$] 
     
-    Np_cap: Population cap at every step barring initialization, i.e., # of stronger individuals to be retained at the end of each step.
+    Np_cap: Population cap at every step excluding initialization, i.e., # of stronger individuals to be retained at the end of each step.
     alpha : rate of mutation
     goal : goal list (goal sequence) - here, embedding from cancer ROI
     g: set of all permissible values that a particular gene can assume.
@@ -41,13 +40,18 @@ def gentl(p, Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_th
     elif mu==2 or mu=='random':
         mu='2'
     if mu=='2':
-        # Step 1: Initialize population
-        population = _ga_step1_initialize_population_randomly_(goal, Np_cap, g)
+        # Step 1: Initialize population randomly
+        if Np_initial==None:
+            Np_initial=Np_cap
+            population = _ga_step1_initialize_population_randomly_(goal, Np_initial, g)
     elif mu=='1':
-        # Step 1: Initialize population
-        population = _ga_step1_initialize_population_(goal, Np_cap, g)
-
-        
+        # Step 1: Initialize population provided by user
+        if p==None or p==[]:
+            if Np_initial==None:
+                Np_initial=Np_cap
+                population = _ga_step1_initialize_population_randomly_(goal, Np_initial, g)
+        else:
+            population = p
     
     for generation in range(max_generations):
         # Step 2: Evaluate fitness and select parents
@@ -91,7 +95,7 @@ def test_genetic_algorithm():
     fitness_threshold = 0.5  # Maximum allowable distance from goal
 
     # Run the genetic algorithm
-    population = gentl([], Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=fitness_threshold)
+    population = gentl(Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=fitness_threshold)
     # Check if the population is empty
     if not population:
         print("Test failed: Population is empty.")
