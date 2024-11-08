@@ -53,6 +53,15 @@ def extract_non_cancer_rois(image, mask, roi_width, roi_height, overlap, max_roi
     return rois
 
 
+def extract_cancer_roi(image, mask):
+    # Extract pixel values within the bounding box where mask is 1
+    bbox = compute_bounding_box(mask)
+    r_min, c_min, r_max, c_max = bbox
+    cancer_roi = image[r_min:r_max, c_min:c_max]  # Slice the cancer region within image
+
+    return cancer_roi
+
+
 class BladderCancerROIVisualizer:
     @staticmethod
     def visualize_single_roi(roi_sample):
@@ -119,6 +128,14 @@ class BladderCancerROIVisualizer:
         plt.show()
 
 
+def compute_bounding_box(mask):
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+    return rmin, cmin, rmax, cmax
+
+
 def compute_neighbors(locations):
     """
     Use KDTree to find the neighbors index and distance to each neighbor,
@@ -131,7 +148,7 @@ def compute_neighbors(locations):
     """
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
-    distances, indices = kdt_tree.query(roi_coordinates, k=4)  # finds the nearest 3 rois
+    distances, indices = kdt_tree.query(roi_coordinates, k=2)  # finds the nearest 3 rois
     neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
     neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
 
