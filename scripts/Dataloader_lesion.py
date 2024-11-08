@@ -2,7 +2,7 @@ import os
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-from ROIExtractor import extract_non_cancer_rois, BladderCancerROIVisualizer
+from ROIExtractor import extract_non_cancer_rois, BladderCancerROIVisualizer, extract_cancer_roi
 import pydicom
 import numpy as np
 from PIL import Image
@@ -104,10 +104,11 @@ class BladderCancerROIDataset(Dataset):
         self.overlap = overlap
         self.max_rois_per_image = max_rois_per_image
 
-        self.roi_samples = self._extract_all_rois()
+        self.roi_samples, self.cancer_samples = self._extract_all_rois()
 
     def _extract_all_rois(self):
         roi_samples = []
+        cancer_samples = {}
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -117,6 +118,10 @@ class BladderCancerROIDataset(Dataset):
                 image, mask, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
+            cancer_roi = extract_cancer_roi(image, mask)
+            # Organize cancer samples by folder_name for quick lookup as a dictionary
+            # eg: {'CT-009':cancer_roi,'CT-010':cancer_roi}
+            cancer_samples[sample['ct_folder']] = torch.from_numpy(cancer_roi).float().unsqueeze(0)
 
             for roi_idx, (roi, coordinates, neighbors) in enumerate(
                     rois
@@ -133,7 +138,7 @@ class BladderCancerROIDataset(Dataset):
                         }
                     )
 
-        return roi_samples
+        return roi_samples, cancer_samples
 
     def __len__(self):
         return len(self.roi_samples)
@@ -153,6 +158,10 @@ class BladderCancerROIDataset(Dataset):
             'ct_folder': sample['ct_folder'],  # folder name
             'case_type': sample['case_type']  # lesion
             }
+
+    def get_cancer_samples(self):
+        """Returns list of dictionary of all cancer roi samples with folder name."""
+        return self.cancer_samples
 
 
 class BladderCancerVisualizer:
@@ -272,7 +281,7 @@ def visualize_dataset(dataset, num_samples=4):
 base_dataset = BladderCancerDataset(
     root_dir=r'C:\Users\vinee\OneDrive\Desktop\Project_Gentl\Gentl\data\original\Al-Bladder Cancer'
     )
-roi_per_image = 5
+roi_per_image = 2
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
     roi_width=128,
@@ -280,18 +289,21 @@ roi_dataset = BladderCancerROIDataset(
     overlap=0.25,
     max_rois_per_image=roi_per_image
     )
+cancer_samples = roi_dataset.get_cancer_samples()
+# print(cancer_samples)
 
-print(f'Total lesion CT images in the dataset {len(base_dataset)}')
-print(f"Total roi's from the lesion data {len(roi_dataset)}  \n")
-
-# Write roi to the file output_dataloader.txt
-with open("output_dataloader.txt", 'w') as file:
-    file.write(f"Number of images:{len(base_dataset)}\nNumber of regions per image:{roi_per_image}\n "
-               f"Total number of roi's:{len(base_dataset)*roi_per_image}\n")
-    for roi in roi_dataset:
-        print(roi)
-        file.write(f"{roi}\n")
-
+# print(f'Total lesion CT images in the dataset {len(base_dataset)}')
+# print(f"Total roi's from the lesion data {len(roi_dataset)}  \n")
+#
+# # Write roi to the file output_dataloader.txt
+# with open("output_dataloader.txt", 'w') as file:
+#     file.write(
+#         f"Number of images:{len(base_dataset)}\nNumber of regions per image:{roi_per_image}\n "
+#         f"Total number of roi's:{len(base_dataset) * roi_per_image}\n"
+#         )
+#     for roi in roi_dataset:
+#         print(roi)
+#         file.write(f"{roi}\n")
 
 # print(roi_dataset) # returns 100 for 100 images and one ROI per image
 
