@@ -76,7 +76,7 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
         print(f"Maximum generation limit reached ({max_generations}). Stopping without finding an exact solution.")
 
     if copy:
-        return population
+        return population, generation
     else:
         np.save('population.npy', np.array(population))
 
