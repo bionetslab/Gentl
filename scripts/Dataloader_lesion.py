@@ -279,7 +279,7 @@ def visualize_dataset(dataset, num_samples=4):
 
 
 base_dataset = BladderCancerDataset(
-    root_dir=r'C:\Users\vinee\OneDrive\Desktop\Project_Gentl\Gentl\data\original\Al-Bladder Cancer'
+    root_dir='../data/original/Al-Bladder Cancer'
     )
 roi_per_image = 2
 roi_dataset = BladderCancerROIDataset(
