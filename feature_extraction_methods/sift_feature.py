@@ -6,9 +6,10 @@ import dummy_roi_extractor
 bbox_region_image = dummy_roi_extractor.extract_cancer_roi()
 
 """Sift Descriptor Code"""
-sift = cv.SIFT_create()
+sift = cv.SIFT_create(nfeatures=0, nOctaveLayers=4, contrastThreshold=0.005, edgeThreshold=10)
 keypoints, descriptors = sift.detectAndCompute(bbox_region_image, None)  # keypoints and corresponding descriptors
-print(len(keypoints))
+print("Keypoints",len(keypoints))
+print(descriptors.reshape(-1).shape)
 """Visualization Code"""
 # print(keypoints)
 # print(descriptors)

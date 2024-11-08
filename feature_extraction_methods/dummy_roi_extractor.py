@@ -152,6 +152,7 @@ def compute_bounding_box(mask):
     rmin, rmax = np.where(rows)[0][[0, -1]]
     cmin, cmax = np.where(cols)[0][[0, -1]]
     return rmin, cmin, rmax, cmax
+    # return rmin, cmin, rmax+5, cmax+20
 
 
 def compute_neighbors(locations):
