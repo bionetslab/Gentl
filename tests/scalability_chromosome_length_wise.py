@@ -1,32 +1,40 @@
+import random
 from gentl.gentl import gentl
 # from gentl import _ga_step2_parent_selection_by_fitness_evaluation_
 from gentl._ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance
 
-def test_genetic_algorithm():
-    # Define goal sequence (e.g., a simple string sequence for testing)
-    goal = [1, 2, 3, 3, 2, 1, 2 ,2, 1, 3]  # A goal sequence for simplicity
+def scalability_chromosome_length_wise():
+    """
+    Test the scalability of the genetic algorithm by varying the length of the chromosome.
+    """
+    g = [1, 2, 3]  # Gene pool
+    Np_cap = 20  # Population size
+    alpha = 0.05  # Mutation rate
+    fitness_threshold = 0.5  # Stopping criterion for fitness
 
-    # Define gene pool (list of permissible values for each gene)
-    g = [1, 2, 3]
+    lengths = [10, 20, 30, 40, 50]  # Different chromosome lengths to test
 
-    # Set genetic algorithm parameters
-    Np_cap = 10           # Population size
-    alpha = 0.05          # Mutation rate (5%)
-    max_generations = 100  # Maximum number of generations
-    fitness_threshold = 0.5  # Maximum allowable distance from goal
+    for length in lengths:
+        random.seed(length)  # Set seed to maintain reproducibility
+        goal = [random.choice(g) for _ in range(length)]  # Random goal sequence of given length
+        # Adjust max generations based on chromosome length
+        max_generations = 100 + length * 5  # Increase generations for longer chromosomes
 
-    # Run the genetic algorithm
-    population = gentl(Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=fitness_threshold)
-    # Check if the population is empty
-    if not population:
-        print("Test failed: Population is empty.")
-        return
-    # Print the result
-    best_chromosome = population[0]
-    best_distance = euclidean_distance(goal, best_chromosome)
-    print(f"Best chromosome: {best_chromosome}")
-    print(f"Distance to goal: {best_distance}")
+        population = gentl(Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=fitness_threshold)
+        if not population:
+            print(f"Chromosome Length {length}: Test failed - Population is empty.")
+            continue
+
+        best_chromosome = population[0]
+        best_distance = euclidean_distance(goal, best_chromosome)
+        if best_distance == 0.0:
+            print(f"Solution found for Chromosome Length {length} in max_generation {max_generations}")
+            print(f"Best chromosome: {best_chromosome}, Distance to goal: {best_distance}")
+        else:
+            print(f"Maximum generation limit reached ({max_generations}). Best chromosome for Length {length}: {best_chromosome}, Distance to goal: {best_distance}")
+
 
 # Run the test
 if __name__ == "__main__":
-    test_genetic_algorithm()
+    print("Running Scalability Test - Chromosome Length-wise...")
+    scalability_chromosome_length_wise()
