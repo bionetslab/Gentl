@@ -26,7 +26,7 @@ def scalability_chromosome_length_wise():
         iters_len_dict[length]=[]
         for iter in range(no_of_iters):
 
-            random.seed(length)  # Set seed to maintain reproducibility
+            # random.seed(length)  # Set seed to maintain reproducibility
             goal = [random.choice(g) for _ in range(length)]  # Random goal sequence of given length
             # Adjust max generations based on chromosome length
             max_generations = 100 + length * 5  # Increase generations for longer chromosomes
@@ -54,5 +54,5 @@ if __name__ == "__main__":
     t_len_dict, iters_len_dict=scalability_chromosome_length_wise()
     # Generate scalability plot:
     print(t_len_dict)
-
-    pd.DataFrame(iters_len_dict)
+    scalability_cr_len_iters_df=pd.DataFrame(iters_len_dict)
+    scalability_cr_len_iters_df.to_csv("scalability_cr_len_iters_df.csv", index=False)
