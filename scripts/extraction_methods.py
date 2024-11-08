@@ -2,6 +2,7 @@ from skimage.feature import hog
 import numpy as np
 from skimage.feature import graycomatrix, graycoprops
 import cv2 as cv
+import pandas as pd
 
 
 # roi range (0,1) and is float32
@@ -76,8 +77,13 @@ def glcm_feature_extractor(image):
     homogeneity = []
 
     """GLCM Code"""
+    angles_column=[]
+    distances_column = []
+    features_df=pd.DataFrame()
     for angle in angles:
         for dis in distances:
+            angles_column.append(angle)
+            distances_column.append(dis)
             glcm_cancer_roi = graycomatrix(
                 image, distances=[dis], angles=[angle], levels=256, symmetric=True, normed=True
                 )
@@ -86,7 +92,15 @@ def glcm_feature_extractor(image):
             energy.append(graycoprops(glcm_cancer_roi, 'energy')[0])
             contrast.append(graycoprops(glcm_cancer_roi, 'contrast')[0])
             homogeneity.append(graycoprops(glcm_cancer_roi, 'homogeneity')[0])
-    return dissimilarity + correlation + energy + contrast + homogeneity
+    # return dissimilarity + correlation + energy + contrast + homogeneity
+    features_df["angle"]=angles_column
+    features_df["distance"] = distances_column
+    features_df["dissimilarity"] = dissimilarity
+    features_df["correlation"] = correlation
+    features_df["energy"] = energy
+    features_df["contrast"] = contrast
+    features_df["homogeneity"] = homogeneity
+    return features_df
 
 
 def fourier_transform_feature_extraction(image):
