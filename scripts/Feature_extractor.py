@@ -74,28 +74,28 @@ if selected_method == "GLCM":
         _contrast = []
         _homogeneity = []
         # -----------------------
-        _dissimilarity_ = row["cancer"][["angle", "distance", "dissimilarity"]]  # dataframe with 3 columns
-        _correlation_ = row["cancer"][["angle", "distance", "correlation"]]
-        _energy_ = row["cancer"][["angle", "distance", "energy"]]
-        _contrast_ = row["cancer"][["angle", "distance", "contrast"]]
-        _homogeneity_ = row["cancer"][["angle", "distance", "homogeneity"]]
+        _dissimilarity_ = row.loc["cancer"][["angle", "distance", "dissimilarity"]].copy()  # dataframe with 3 columns
+        _dissimilarity_["roi_condition"] = "cancer"
+        _dissimilarity_["patient_id"] = index
+        _correlation_ = row.loc["cancer"][["angle", "distance", "correlation"]].copy()
+        _correlation_["roi_condition"] = "cancer"
+        _correlation_["patient_id"] = index
+        _energy_ = row.loc["cancer"][["angle", "distance", "energy"]].copy()
+        _energy_["roi_condition"] = "cancer"
+        _energy_["patient_id"] = index
+        _contrast_ = row.loc["cancer"][["angle", "distance", "contrast"]].copy()
+        _contrast_["roi_condition"] = "cancer"
+        _contrast_["patient_id"] = index
+        _homogeneity_ = row.loc["cancer"][["angle", "distance", "homogeneity"]].copy()
+        _homogeneity_["roi_condition"] = "cancer"
+        _homogeneity_["patient_id"] = index
         # -----------------------
         if no_of_columns == 1:
             _dissimilarity = _dissimilarity_
-            _dissimilarity["roi_condition"] = "cancer"
-            _dissimilarity["patient_id"] = index
             _correlation = _correlation_
-            _correlation["roi_condition"] = "cancer"
-            _correlation["patient_id"] = index
             _energy = _energy_
-            _energy["roi_condition"] = "cancer"
-            _energy["patient_id"] = index
             _contrast = _contrast_
-            _contrast["roi_condition"] = "cancer"
-            _contrast["patient_id"] = index
             _homogeneity = _homogeneity_
-            _homogeneity["roi_condition"] = "cancer"
-            _homogeneity["patient_id"] = index
 
         else:
             count = -1
