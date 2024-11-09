@@ -65,7 +65,7 @@ def hog_feature_extractor(image):
     return feature
 
 
-def glcm_feature_extractor(image):
+def glcm_feature_extractor(roi):
     """GLCM - range is not between 0 and 1 - no.of features 100 features per image"""
     angles = [0, np.pi / 4, np.pi / 2, np.pi * 3 / 2]
     distances = [1, 2, 3, 4, 5]
@@ -77,23 +77,24 @@ def glcm_feature_extractor(image):
     homogeneity = []
 
     """GLCM Code"""
-    angles_column=[]
+    angles_column = []
     distances_column = []
-    features_df=pd.DataFrame()
+    features_df = pd.DataFrame()
     for angle in angles:
         for dis in distances:
             angles_column.append(angle)
             distances_column.append(dis)
             glcm_cancer_roi = graycomatrix(
-                image, distances=[dis], angles=[angle], levels=256, symmetric=True, normed=True
+                roi, distances=[dis], angles=[angle], levels=256, symmetric=True, normed=True
                 )
+            # returns a 2d numpy array - use [0,0] to index single value
             dissimilarity.append(graycoprops(glcm_cancer_roi, 'dissimilarity')[0, 0])
             correlation.append(graycoprops(glcm_cancer_roi, 'correlation')[0, 0])
-            energy.append(graycoprops(glcm_cancer_roi, 'energy')[0])
-            contrast.append(graycoprops(glcm_cancer_roi, 'contrast')[0])
-            homogeneity.append(graycoprops(glcm_cancer_roi, 'homogeneity')[0])
+            energy.append(graycoprops(glcm_cancer_roi, 'energy')[0, 0])
+            contrast.append(graycoprops(glcm_cancer_roi, 'contrast')[0, 0])
+            homogeneity.append(graycoprops(glcm_cancer_roi, 'homogeneity')[0, 0])
     # return dissimilarity + correlation + energy + contrast + homogeneity
-    features_df["angle"]=angles_column
+    features_df["angle"] = angles_column
     features_df["distance"] = distances_column
     features_df["dissimilarity"] = dissimilarity
     features_df["correlation"] = correlation
