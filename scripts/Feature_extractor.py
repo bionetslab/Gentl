@@ -99,24 +99,24 @@ if selected_method == "GLCM":
 
         else:
             count = -1
-            for col in cols_:
+            for col in cols_: # cols_ = ["cancer",1,2]
                 count += 1
                 if count == 0:  # skipping the cancer column
                     multiple_col_flag = 1  # No action.
                 else:
-                    _dissimilarity_ = row[col][["angle", "distance", "dissimilarity"]].copy()
+                    _dissimilarity_ = row.iloc[col][["angle", "distance", "dissimilarity"]].copy()
                     _dissimilarity_["roi_condition"] = "healthy"
                     _dissimilarity_["patient_id"] = index
-                    _correlation_ = row[col][["angle", "distance", "correlation"]].copy()
+                    _correlation_ = row.iloc[col][["angle", "distance", "correlation"]].copy()
                     _correlation_["roi_condition"] = "healthy"
                     _correlation_["patient_id"] = index
-                    _energy_ = row[col][["angle", "distance", "energy"]].copy()
+                    _energy_ = row.iloc[col][["angle", "distance", "energy"]].copy()
                     _energy_["roi_condition"] = "healthy"
                     _energy_["patient_id"] = index
-                    _contrast_ = row[col][["angle", "distance", "contrast"]].copy()
+                    _contrast_ = row.iloc[col][["angle", "distance", "contrast"]].copy()
                     _contrast_["roi_condition"] = "healthy"
                     _contrast_["patient_id"] = index
-                    _homogeneity_ = row[col][["angle", "distance", "homogeneity"]].copy()
+                    _homogeneity_ = row.iloc[col][["angle", "distance", "homogeneity"]].copy()
                     _homogeneity_["roi_condition"] = "healthy"
                     _homogeneity_["patient_id"] = index
 
