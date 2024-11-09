@@ -48,18 +48,19 @@ def extract_features(selected_method):
     return feature_results
 
 
-selected_method = "GLCM" # select the method for feature extraction
+selected_method = "GLCM"  # select the method for feature extraction
 extracted_features = extract_features(selected_method)
-extracted_features_df=pd.DataFrame(extracted_features).T
-extracted_features_df=extracted_features_df.rename(columns={0:"cancer"})
-cols_=list(extracted_features_df.columns)
-no_of_columns=len(cols_)
-if no_of_columns>1:
-    columns_rename_dict={}
+extracted_features_df = pd.DataFrame(extracted_features).T
+extracted_features_df = extracted_features_df.rename(columns={0: "cancer"})
+cols_ = list(extracted_features_df.columns)
+no_of_columns = len(cols_)
+if no_of_columns > 1:
+    columns_rename_dict = {}
     for col in cols_[1:]:
         columns_rename_dict[col] = f"healthy_{col}"
     extracted_features_df = extracted_features_df.rename(columns=columns_rename_dict)
 
+cols_names = list(extracted_features_df.columns)
 Dissimilarity = []
 Correlation = []
 Energy = []
@@ -74,59 +75,30 @@ if selected_method == "GLCM":
         _contrast = []
         _homogeneity = []
         # -----------------------
-        _dissimilarity_ = row.loc["cancer"][["angle", "distance", "dissimilarity"]].copy()  # dataframe with 3 columns
-        _dissimilarity_["roi_condition"] = "cancer"
-        _dissimilarity_["patient_id"] = index
-        _correlation_ = row.loc["cancer"][["angle", "distance", "correlation"]].copy()
-        _correlation_["roi_condition"] = "cancer"
-        _correlation_["patient_id"] = index
-        _energy_ = row.loc["cancer"][["angle", "distance", "energy"]].copy()
-        _energy_["roi_condition"] = "cancer"
-        _energy_["patient_id"] = index
-        _contrast_ = row.loc["cancer"][["angle", "distance", "contrast"]].copy()
-        _contrast_["roi_condition"] = "cancer"
-        _contrast_["patient_id"] = index
-        _homogeneity_ = row.loc["cancer"][["angle", "distance", "homogeneity"]].copy()
-        _homogeneity_["roi_condition"] = "cancer"
-        _homogeneity_["patient_id"] = index
-        # -----------------------
-        if no_of_columns == 1:
-            _dissimilarity = _dissimilarity_
-            _correlation = _correlation_
-            _energy = _energy_
-            _contrast = _contrast_
-            _homogeneity = _homogeneity_
+        for col in cols_names:  # cols_ = ["cancer",healthy_1,healthy_2,....]
+            _dissimilarity_ = row.loc[col][["angle", "distance", "dissimilarity"]].copy()
+            _dissimilarity_["roi_condition"] = "cancer" if col == "cancer" else "healthy"
+            _dissimilarity_["patient_id"] = index
+            _correlation_ = row.loc[col][["angle", "distance", "correlation"]].copy()
+            _correlation_["roi_condition"] = "cancer" if col == "cancer" else "healthy"
+            _correlation_["patient_id"] = index
+            _energy_ = row.loc[col][["angle", "distance", "energy"]].copy()
+            _energy_["roi_condition"] = "cancer" if col == "cancer" else "healthy"
+            _energy_["patient_id"] = index
+            _contrast_ = row.loc[col][["angle", "distance", "contrast"]].copy()
+            _contrast_["roi_condition"] = "cancer" if col == "cancer" else "healthy"
+            _contrast_["patient_id"] = index
+            _homogeneity_ = row.loc[col][["angle", "distance", "homogeneity"]].copy()
+            _homogeneity_["roi_condition"] = "cancer" if col == "cancer" else "healthy"
+            _homogeneity_["patient_id"] = index
 
-        else:
-            count = -1
-            for col in cols_: # cols_ = ["cancer",1,2]
-                count += 1
-                if count == 0:  # skipping the cancer column
-                    multiple_col_flag = 1  # No action.
-                else:
-                    _dissimilarity_ = row.iloc[col][["angle", "distance", "dissimilarity"]].copy()
-                    _dissimilarity_["roi_condition"] = "healthy"
-                    _dissimilarity_["patient_id"] = index
-                    _correlation_ = row.iloc[col][["angle", "distance", "correlation"]].copy()
-                    _correlation_["roi_condition"] = "healthy"
-                    _correlation_["patient_id"] = index
-                    _energy_ = row.iloc[col][["angle", "distance", "energy"]].copy()
-                    _energy_["roi_condition"] = "healthy"
-                    _energy_["patient_id"] = index
-                    _contrast_ = row.iloc[col][["angle", "distance", "contrast"]].copy()
-                    _contrast_["roi_condition"] = "healthy"
-                    _contrast_["patient_id"] = index
-                    _homogeneity_ = row.iloc[col][["angle", "distance", "homogeneity"]].copy()
-                    _homogeneity_["roi_condition"] = "healthy"
-                    _homogeneity_["patient_id"] = index
+            _dissimilarity.append(_dissimilarity_)  # append each dataframe to the list
+            _correlation.append(_correlation_)
+            _energy.append(_energy_)
+            _contrast.append(_contrast_)
+            _homogeneity.append(_homogeneity_)
 
-                _dissimilarity.append(_dissimilarity_)  # append each dataframe to the list
-                _correlation.append(_correlation_)
-                _energy.append(_energy_)
-                _contrast.append(_contrast_)
-                _homogeneity.append(_homogeneity_)
-
-        dissimilarity = pd.concat(_dissimilarity, axis=0)  # axis=0, stacks vertically on top of each other
+        dissimilarity = pd.concat(_dissimilarity, axis=0)  # axis=0, stacks vertically on top of each other for each patient
         correlation = pd.concat(_correlation, axis=0)
         energy = pd.concat(_energy, axis=0)
         contrast = pd.concat(_contrast, axis=0)
@@ -138,7 +110,7 @@ if selected_method == "GLCM":
         Contrast.append(contrast)
         Homogeneity.append(homogeneity)
 # ---
-Dissimilarity = pd.concat(Dissimilarity, axis=0) # increase rows - on top og each other
+Dissimilarity = pd.concat(Dissimilarity, axis=0)  # increase rows - on top of each other
 Correlation = pd.concat(Correlation, axis=0)
 Energy = pd.concat(Energy, axis=0)
 Contrast = pd.concat(Contrast, axis=0)
