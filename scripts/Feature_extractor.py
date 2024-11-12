@@ -3,7 +3,7 @@ from scripts.extraction_methods import feature_extraction_method
 import pandas as pd
 
 
-def extract_features(selected_method):
+def extract_features(selected_method, roi_per_image=2):
     """
     Call this function to extract features from images - roi_per_image can be passed as an argument
     :return:
@@ -14,7 +14,7 @@ def extract_features(selected_method):
     base_dataset = BladderCancerDataset(
         root_dir='../data/original/Al-Bladder Cancer'
         )
-    roi_per_image = 2
+    roi_per_image = roi_per_image
 
     roi_dataset = BladderCancerROIDataset(
         base_dataset,
@@ -48,8 +48,9 @@ def extract_features(selected_method):
     return feature_results
 
 
+max_roi_per_image = 2
 selected_method = "GLCM"  # select the method for feature extraction
-extracted_features = extract_features(selected_method)
+extracted_features = extract_features(selected_method, max_roi_per_image)
 extracted_features_df = pd.DataFrame(extracted_features).T
 extracted_features_df = extracted_features_df.rename(columns={0: "cancer"})
 cols_ = list(extracted_features_df.columns)

@@ -67,8 +67,8 @@ def hog_feature_extractor(image):
 
 def glcm_feature_extractor(roi):
     """GLCM - range is not between 0 and 1 - no.of features 100 features per image"""
-    angles = [0, np.pi / 4, np.pi / 2, np.pi * 3 / 2]
-    distances = [1, 2, 3, 4, 5]
+    angles = [0, np.pi / 4, np.pi / 2, np.pi * 3 / 4]
+    distances = [1, 2, 3, 5, 7]
     # Compute some GLCM properties
     dissimilarity = []
     correlation = []

@@ -37,19 +37,31 @@ def extract_non_cancer_rois(image, mask, roi_width, roi_height, overlap, max_roi
                 rois.append((roi, coordinates))  # tuple with roi and coordinates
 
             if max_rois and len(rois) >= max_rois:
-                neighbors = compute_neighbors(locations)
-                # Update each entry in `rois` to include its corresponding neighbors
-                rois = [
-                    (roi, coordinates, neighbors[idx])
-                    for idx, (roi, coordinates) in enumerate(rois)
-                    ]
+                if max_rois > 1:
+                    neighbors = compute_neighbors(locations)
+                    # Update each entry in `rois` to include its corresponding neighbors
+                    rois = [
+                        (roi, coordinates, neighbors[idx])
+                        for idx, (roi, coordinates) in enumerate(rois)
+                        ]
+                else:
+                    rois = [
+                        (roi, coordinates, [])
+                        for idx, (roi, coordinates) in enumerate(rois)
+                        ]
                 return rois
-    neighbors = compute_neighbors(locations)
-    # Update each entry in `rois` to include its corresponding neighbors
-    rois = [
-        (roi, coordinates, neighbors[idx])
-        for idx, (roi, coordinates) in enumerate(rois)
-        ]
+    if max_rois > 1:
+        neighbors = compute_neighbors(locations)
+        # Update each entry in `rois` to include its corresponding neighbors
+        rois = [
+            (roi, coordinates, neighbors[idx])
+            for idx, (roi, coordinates) in enumerate(rois)
+            ]
+    else:
+        rois = [
+            (roi, coordinates, [])
+            for idx, (roi, coordinates) in enumerate(rois)
+            ]
     return rois
 
 
@@ -148,7 +160,7 @@ def compute_neighbors(locations):
     """
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
-    distances, indices = kdt_tree.query(roi_coordinates, k=2)  # finds the nearest 3 rois
+    distances, indices = kdt_tree.query(roi_coordinates, k=2)  # k=n, finds the nearest n-1 neighbors
     neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
     neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
 
