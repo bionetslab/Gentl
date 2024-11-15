@@ -9,6 +9,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import networkx as nx
 
 
 class BladderCancerDataset(Dataset):
@@ -282,7 +283,7 @@ def visualize_dataset(dataset, num_samples=4):
 base_dataset = BladderCancerDataset(
     root_dir='../data/original/Al-Bladder Cancer'
     )
-roi_per_image = 2
+roi_per_image = 10
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
     roi_width=128,
@@ -290,37 +291,113 @@ roi_dataset = BladderCancerROIDataset(
     overlap=0.25,
     max_rois_per_image=roi_per_image
     )
+
 cancer_samples = roi_dataset.get_cancer_samples()
-# print(cancer_samples)
 
-# print(f'Total lesion CT images in the dataset {len(base_dataset)}')
-# print(f"Total roi's from the lesion data {len(roi_dataset)}  \n")
+
+
+
+
+# def createList(r1, r2):
+#     return [item for item in range(r1, r2 + 1)]
+# r1, r2 = 1, len(roi_dataset)
+# print(createList(r1, r2))
+
+# for r in roi_dataset:
 #
-# # Write roi to the file output_dataloader.txt
-# with open("output_dataloader.txt", 'w') as file:
-#     file.write(
-#         f"Number of images:{len(base_dataset)}\nNumber of regions per image:{roi_per_image}\n "
-#         f"Total number of roi's:{len(base_dataset) * roi_per_image}\n"
-#         )
-#     for roi in roi_dataset:
-#         print(roi)
-#         file.write(f"{roi}\n")
+#     spatial_knn_network = nx.Graph()
+#     edge_list = []
+#
+#     for roi in r:
+#
+#
+#
+#     spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"], neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'], case_type=r['case_type'])
+#     list_of_neighs=[]
+#     for no_of_neighs in range(len(r['neighbors'])):
+#         edge_tuple=(r["index"])
 
-# print(roi_dataset) # returns 100 for 100 images and one ROI per image
+#
 
-# roi_dataloader = DataLoader(
-#     roi_dataset,
-#     batch_size=16,
-#     shuffle=True,
-#     num_workers=4
-# )
+patient_labels=[]
+for r in roi_dataset:
+    patient_labels.append(r["ct_folder"])
+patient_labels=list(set(patient_labels))
+new_patient_labels=[]
+for patient_label in patient_labels:
+    new_patient_labels.append(patient_label.replace("-", "_"))
+patientIndex_newPatientIndex_dict=dict(zip(patient_labels, new_patient_labels))
 
-# visualizer = BladderCancerROIVisualizer()
+for patient_label in patient_labels:
+    graph_name= f"spatial_knn_network_{patientIndex_newPatientIndex_dict[patient_label]}"
+    exec(graph_name + "= nx.Graph()")
 
-# sample = roi_dataset[0]
-# visualizer.visualize_single_roi(sample)
+    patient_wise_rois=[]
+    for r in roi_dataset:
+        if patientIndex_newPatientIndex_dict[r["ct_folder"]]==patientIndex_newPatientIndex_dict[patient_label]:
+            patient_wise_rois.append(r)
 
-# batch = next(iter(roi_dataloader))
-# visualizer.visualize_roi_batch(batch)
+    edge_list=[]
 
-# visualizer.visualize_dataset(roi_dataset)
+    index_=-1
+    for roi in patient_wise_rois:
+        index_+=1
+        exec(graph_name + ".add_node(index_, r_index=r['index'], image=r['image'], coordinates=r['coordinates'], neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'], case_type=r['case_type'])")
+
+        # spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"],
+        #                              neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'],
+        #                              case_type=r['case_type'])
+
+        list_of_edges=[]
+        list_of_neighs = []
+        for neighs in roi['neighbors']:
+            list_of_neighs.append(list(neighs.keys())[0])
+            edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]]))
+            list_of_edges.append(edge_tuple)
+        list_of_edges=list(set(list_of_edges))
+        exec(graph_name + ".add_edges_from(list_of_edges)")
+
+
+
+
+
+
+                # list_of_edges.append()
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # for no_of_neighs in range(len(r['neighbors'])):
+        #     edge_tuple = tuple(sorted(r["index"]))
+
+
+
+
+
+
+
+
+
+    # edge_list = []
+    #
+    # for roi in r:
+    #
+    #
+    #
+    # spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"], neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'], case_type=r['case_type'])
+    # list_of_neighs=[]
+    # for no_of_neighs in range(len(r['neighbors'])):
+    #     edge_tuple=(r["index"])
+
+
+
+

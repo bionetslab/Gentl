@@ -160,7 +160,7 @@ def compute_neighbors(locations):
     """
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
-    distances, indices = kdt_tree.query(roi_coordinates, k=2)  # k=n, finds the nearest n-1 neighbors
+    distances, indices = kdt_tree.query(roi_coordinates, k=4)  # k=n, finds the nearest n-1 neighbors
     neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
     neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
 

@@ -30,7 +30,7 @@ def run_gentl_with_gmm_results():
         # Set genetic algorithm parameters
         Np_cap = 10  # Population size
         alpha = 0.1  # Mutation rate (10%)
-        max_generations = 50  # Maximum number of iterations
+        max_generations = 10  # Maximum number of iterations
         fitness_threshold = 0.1  # Distance threshold
 
         # Run the genetic algorithm
@@ -59,16 +59,16 @@ def run_gentl_with_gmm_results():
 
 
     # Sort by number of iterations and output
-    sorted_by_generation = sorted(optimization_results, key=lambda x: x['generation'])
-    print("\nSorted results by number of iterations:")
-    for result in sorted_by_generation:
-        print(f"Patient {result['patient_id']}, Number of iterations: {result['generation']}")
+    # sorted_by_generation = sorted(optimization_results, key=lambda x: x['generation'])
+    # print("\nSorted results by number of iterations:")
+    # for result in sorted_by_generation:
+    #     print(f"Patient {result['patient_id']}, Number of iterations: {result['generation']}")
 
     # Optionally, sort by distance between best individual and goal and output
-    # sorted_by_distance = sorted(optimization_results, key=lambda x: x['best_distance'])
-    # print("\nSorted results by distance between best individual and goal:")
-    # for result in sorted_by_distance:
-    #     print(f"Patient {result['patient_id']}, Distance between best individual and goal: {result['best_distance']}")
+    sorted_by_distance = sorted(optimization_results, key=lambda x: x['best_distance'])
+    print("\nSorted results by distance between best individual and goal:")
+    for result in sorted_by_distance:
+        print(f"Patient {result['patient_id']}, Distance between best individual and goal: {result['best_distance']}")
 
 
 # Run the test of gentl and GMM integration
