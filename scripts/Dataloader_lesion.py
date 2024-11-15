@@ -2,7 +2,7 @@ import os
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-from ROIExtractor import extract_non_cancer_rois, BladderCancerROIVisualizer, extract_cancer_roi
+from scripts.ROIExtractor import extract_non_cancer_rois, BladderCancerROIVisualizer, extract_cancer_roi
 import pydicom
 import numpy as np
 from PIL import Image
@@ -122,6 +122,7 @@ class BladderCancerROIDataset(Dataset):
             # Organize cancer samples by folder_name for quick lookup as a dictionary
             # eg: {'CT-009':cancer_roi,'CT-010':cancer_roi}
             cancer_samples[sample['ct_folder']] = torch.from_numpy(cancer_roi).float().unsqueeze(0)
+            cancer_samples[f"{sample['ct_folder']}-time_point"] = sample['time_point']
 
             for roi_idx, (roi, coordinates, neighbors) in enumerate(
                     rois
