@@ -355,7 +355,27 @@ for patient_label in patient_labels:
             edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]]))
             list_of_edges.append(edge_tuple)
         list_of_edges=list(set(list_of_edges))
-        exec(graph_name + ".add_edges_from(list_of_edges)")
+
+        dict_of_edge_attributes={}
+        list_of_edge_attributes = []
+        for edge in list_of_edges:
+            if edge[0]==index_:
+                n=edge[1]
+            else:
+                n=edge[0]
+
+            for neighs2 in roi["neighbors"]:
+                if list(neighs2.keys())[0]==n:
+                    dist=neighs2[n]["distance"]
+            dict_of_edge_attributes[edge]=dist
+            list_of_edge_attributes.append(dist)
+
+        exec(graph_name + ".add_edges_from(list_of_edges, spatial_distance=list_of_edge_attributes)")
+
+
+
+
+
 
 
 
