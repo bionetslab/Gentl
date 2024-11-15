@@ -69,14 +69,15 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
 
         # Stopping condition: If all individuals are close enough to the goal
         if all(euclidean_distance(goal, chromosome) < fitness_threshold for chromosome in population):
-            print(f"Solution found in generation {generation}")
+            #print(f"Solution found in generation {generation}")
             break
 
     else:
         print(f"Maximum generation limit reached ({max_generations}). Stopping without finding an exact solution.")
 
+    best_individual = min(population, key=lambda chromosome: euclidean_distance(goal, chromosome))
     if copy:
-        return population, generation
+        return best_individual, generation
     else:
         np.save('population.npy', np.array(population))
 

@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/virtualenvbionet" />
       <excludeFolder url="file://$MODULE_DIR$/venvbionetproject" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (Gentl)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="dlenvironment" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
