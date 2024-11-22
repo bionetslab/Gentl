@@ -114,9 +114,10 @@ class BladderCancerROIDataset(Dataset):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
             mask = sample['mask'].squeeze().numpy()
+            ct_folder = sample['ct_folder']
 
             rois, cancer_roi, cancer_coordinates, cancer_neighbors = extract_non_cancer_rois(
-                image, mask, self.roi_width, self.roi_height,
+                ct_folder, image, mask, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
 
@@ -296,12 +297,12 @@ base_dataset = BladderCancerDataset(
 roi_per_image = 10
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
-    roi_width=128,
-    roi_height=128,
+    roi_width=20,
+    roi_height=20,
     overlap=0.25,
     max_rois_per_image=roi_per_image
     )
-
+print(len(roi_dataset))
 cancer_roi_dataset = roi_dataset.get_cancer_samples()
 full_roi_dataset = roi_dataset + cancer_roi_dataset
 
