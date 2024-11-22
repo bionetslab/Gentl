@@ -110,7 +110,7 @@ class BladderCancerROIDataset(Dataset):
     def _extract_all_rois(self):
         roi_samples = []
         cancer_samples = []
-        neighbour_parm = "knn" # or dist_threshold
+        neighbour_parm = "dist_threshold" # or dist_threshold
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -304,6 +304,8 @@ roi_dataset = BladderCancerROIDataset(
     max_rois_per_image=roi_per_image
     )
 print(len(roi_dataset))
+# for r in roi_dataset:
+#     print(r)
 cancer_roi_dataset = roi_dataset.get_cancer_samples()
 full_roi_dataset = roi_dataset + cancer_roi_dataset
 

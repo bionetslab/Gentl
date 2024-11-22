@@ -216,7 +216,7 @@ def distance_threshold(locations, cancer_roi=False):
     :return:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
-    threshold_dist = 100
+    threshold_dist = 600
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
 
@@ -228,7 +228,7 @@ def distance_threshold(locations, cancer_roi=False):
         # neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
         neighbors_dict = {
             len(roi_coordinates) - 1: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
-                                       for idx, dist in zip(indices.ravel(), distances.ravel()) if idx != len(roi_coordinates)-1]
+                                       for idx, dist in zip(indices[0], distances[0]) if idx != len(roi_coordinates)-1]
             }  # zip two lists and access the corresponding values
     else:
         indices, distances = kdt_tree.query_radius(roi_coordinates, r=threshold_dist, return_distance=True)
