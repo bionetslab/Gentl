@@ -23,8 +23,17 @@ def extract_features(selected_method, roi_per_image=2):
         overlap=0.25,
         max_rois_per_image=roi_per_image
         )
-    cancer_rois_by_folder = roi_dataset.get_cancer_samples()
+    cancer_rois_dataset = roi_dataset.get_cancer_samples()
     feature_results = {}
+
+    # Iterate over cancer roi's and organise ROI by folder_name
+    cancer_rois_by_folder = {}
+    """eg:{'CT-009':[ROI],'CT-010':[ROI]..}"""
+    for roi in cancer_rois_dataset:
+        folder_name = roi['ct_folder']
+        if folder_name not in cancer_rois_by_folder:
+            cancer_rois_by_folder[folder_name] = []
+        cancer_rois_by_folder[folder_name].append(roi['image'])
 
     # Iterate over the noncancerous roi dataset and organize ROIs by folder_name
     """eg:{'CT-009':[ROI1,ROI2],'CT-010':[ROI1,ROI2]}"""
@@ -40,7 +49,7 @@ def extract_features(selected_method, roi_per_image=2):
         if folder_name in cancer_rois_by_folder:
             # Create a list starting with the cancer ROI, followed by all non-cancer ROIs for this folder
             """eg:[C_ROI,ROI1,ROI2]"""
-            roi_list = [cancer_rois_by_folder[folder_name]] + non_cancer_rois
+            roi_list = cancer_rois_by_folder[folder_name] + non_cancer_rois
             # Pass this list to the feature extraction method
             features = feature_extraction_method(roi_list, extraction_methods[selected_method])
             feature_results[folder_name] = features
@@ -48,10 +57,11 @@ def extract_features(selected_method, roi_per_image=2):
     return feature_results
 
 
-max_roi_per_image = 2
+max_roi_per_image = 5
 selected_method = "GLCM"  # select the method for feature extraction
 extracted_features = extract_features(selected_method, max_roi_per_image)
 extracted_features_df = pd.DataFrame(extracted_features).T
+
 extracted_features_df = extracted_features_df.rename(columns={0: "cancer"})
 cols_ = list(extracted_features_df.columns)
 no_of_columns = len(cols_)

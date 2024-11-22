@@ -19,7 +19,7 @@ def extract_non_cancer_rois(image, mask, roi_width, roi_height, overlap, max_roi
     Returns:
     list: List of extracted ROI arrays.
     """
-    h, w = image.shape
+    h, w = image.shape  # (512,512)
     stride_y = int(roi_height * (1 - overlap))
     stride_x = int(roi_width * (1 - overlap))
 
@@ -49,7 +49,10 @@ def extract_non_cancer_rois(image, mask, roi_width, roi_height, overlap, max_roi
                         (roi, coordinates, [])
                         for idx, (roi, coordinates) in enumerate(rois)
                         ]
-                return rois
+                c_roi, c_coordinates = extract_cancer_roi(image, mask)
+                locations.append(c_coordinates)
+                c_neighbors = compute_neighbors(locations, True)
+                return rois,c_roi,c_coordinates,c_neighbors[len(locations)-1]
     if max_rois > 1:
         neighbors = compute_neighbors(locations)
         # Update each entry in `rois` to include its corresponding neighbors
@@ -62,16 +65,19 @@ def extract_non_cancer_rois(image, mask, roi_width, roi_height, overlap, max_roi
             (roi, coordinates, [])
             for idx, (roi, coordinates) in enumerate(rois)
             ]
-    return rois
+    c_roi, c_coordinates = extract_cancer_roi(image, mask)
+    locations.append(c_coordinates)
+    c_neighbors = compute_neighbors(locations, True)
+    return rois, c_roi, c_coordinates, c_neighbors[len(locations)-1]
 
 
 def extract_cancer_roi(image, mask):
     # Extract pixel values within the bounding box where mask is 1
     bbox = compute_bounding_box(mask)
-    r_min, c_min, r_max, c_max = bbox
+    r_min, c_min, r_max, c_max = bbox  # (y1,x1,y2,x2)
     cancer_roi = image[r_min:r_max, c_min:c_max]  # Slice the cancer region within image
 
-    return cancer_roi
+    return cancer_roi, bbox
 
 
 class BladderCancerROIVisualizer:
@@ -148,7 +154,7 @@ def compute_bounding_box(mask):
     return rmin, cmin, rmax, cmax
 
 
-def compute_neighbors(locations):
+def compute_neighbors(locations, cancer_roi=False):
     """
     Use KDTree to find the neighbors index and distance to each neighbor,
     no.of.neighbors controlled by param k.
@@ -158,19 +164,31 @@ def compute_neighbors(locations):
     :return:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
+    no_of_neighbors = 4
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
-    distances, indices = kdt_tree.query(roi_coordinates, k=4)  # k=n, finds the nearest n-1 neighbors
-    neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
-    neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
 
-    # for each roi in roi_coordinates, store its neighbor and the distance as key value pair
-    neighbors_dict = {
-        i: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
-            for idx, dist in zip(neighbor_indices[i], neighbor_distances[i])]
-        for i in range(len(roi_coordinates))
-        }  # zip two lists and access the corresponding values
-
+    if cancer_roi:
+        distances, indices = kdt_tree.query(
+            [roi_coordinates[-1]], k=no_of_neighbors
+            )  # k=n, finds the nearest n-1 neighbors
+        neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
+        neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
+        neighbors_dict = {
+            len(roi_coordinates) - 1: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
+                                       for idx, dist in zip(neighbor_indices.ravel(), neighbor_distances.ravel())]
+            }  # zip two lists and access the corresponding values
+    else:
+        distances, indices = kdt_tree.query(roi_coordinates, k=no_of_neighbors)  # k=n, finds the nearest n-1 neighbors
+        neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
+        neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
+        # for each roi in roi_coordinates, store its neighbor and the distance as key value pair
+        neighbors_dict = {
+            i: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
+                for idx, dist in zip(neighbor_indices[i], neighbor_distances[i])]
+            for i in range(len(roi_coordinates))
+            }  # zip two lists and access the corresponding values
     return neighbors_dict
 
+# {10: [{7: {'distance': 205.73040611440985, 'coordinates': (96, 192, 224, 320)}}, {8: {'distance': 209.88806540630173, 'coordinates': (96, 288, 224, 416)}}, {6: {'distance': 242.9588442514493, 'coordinates': (96, 96, 224, 224)}}]}
 # 'neighbors': [{1: {'distance': 96.0, 'coordinates': (0, 96, 128, 224)}}, {2: {'distance': 192.0, 'coordinates': (0, 192, 128, 320)}}, {3: {'distance': 288.0, 'coordinates': (0, 288, 128, 416)}}]

@@ -109,21 +109,31 @@ class BladderCancerROIDataset(Dataset):
 
     def _extract_all_rois(self):
         roi_samples = []
-        cancer_samples = {}
+        cancer_samples = []
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
             mask = sample['mask'].squeeze().numpy()
 
-            rois = extract_non_cancer_rois(
+            rois, cancer_roi, cancer_coordinates, cancer_neighbors = extract_non_cancer_rois(
                 image, mask, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
-            cancer_roi = extract_cancer_roi(image, mask)
+
             # Organize cancer samples by folder_name for quick lookup as a dictionary
             # eg: {'CT-009':cancer_roi,'CT-010':cancer_roi}
-            cancer_samples[sample['ct_folder']] = torch.from_numpy(cancer_roi).float().unsqueeze(0)
-            cancer_samples[f"{sample['ct_folder']}-time_point"] = sample['time_point']
+            cancer_samples.append(
+                {
+                    "index": f"C-{sample['ct_folder']}",
+                    "image": torch.from_numpy(cancer_roi).float().unsqueeze(0),
+                    "coordinates": tuple(int(cord) for cord in cancer_coordinates),
+                    "neighbors": cancer_neighbors,
+                    'time_point': sample['time_point'],  # cancer stage
+                    'ct_folder': sample['ct_folder'],  # folder name
+                    'case_type': sample['case_type']  # lesion
+                    }
+
+                )
 
             for roi_idx, (roi, coordinates, neighbors) in enumerate(
                     rois
@@ -162,7 +172,7 @@ class BladderCancerROIDataset(Dataset):
             }
 
     def get_cancer_samples(self):
-        """Returns list of dictionary of all cancer roi samples with folder name."""
+        """Returns list of dictionary of all cancer roi samples"""
         return self.cancer_samples
 
 
@@ -292,7 +302,10 @@ roi_dataset = BladderCancerROIDataset(
     max_rois_per_image=roi_per_image
     )
 
-cancer_samples = roi_dataset.get_cancer_samples()
+cancer_roi_dataset = roi_dataset.get_cancer_samples()
+full_roi_dataset = roi_dataset + cancer_roi_dataset
+
+# {(0, 1): 96.0, (0, 5): 96.0, (0, 6): 135.7645019878171, (1, 6): 96.0, (1, 2): 96.0, (1, 5): 135.7645019878171, (5, 6): 96.0, (6, 7): 96.0, (6, 10): 242.9588442514493, (2, 3): 96.0, (2, 7): 96.0, (3, 8): 96.0, (3, 4): 96.0, (3, 9): 135.7645019878171, (7, 8): 96.0, (7, 10): 205.73040611440985, (8, 4): 135.7645019878171, (8, 9): 96.0, (8, 10): 209.88806540630173, (4, 9): 96.0}
 
 # def createList(r1, r2):
 #     return [item for item in range(r1, r2 + 1)]
@@ -316,7 +329,7 @@ cancer_samples = roi_dataset.get_cancer_samples()
 #
 
 patient_labels = []
-for r in roi_dataset:
+for r in full_roi_dataset:
     patient_labels.append(r["ct_folder"])
 patient_labels = list(set(patient_labels))  # list of patient id's
 new_patient_labels = []
@@ -329,7 +342,7 @@ for patient_label in patient_labels:
     exec(graph_name + "= nx.Graph()")  # creates n empty graphs, n-no of patients
 
     patient_wise_rois = []
-    for r in roi_dataset:  # takes the first non cancer roi
+    for r in full_roi_dataset:  # takes the first non cancer roi
         if patientIndex_newPatientIndex_dict[r["ct_folder"]] == patientIndex_newPatientIndex_dict[patient_label]:
             patient_wise_rois.append(r)  # collect the roi's corresponding to 1 patient - list of dict
 
@@ -348,22 +361,22 @@ for patient_label in patient_labels:
 
         list_of_edges = []
         list_of_neighs = []
-        for neighs in roi['neighbors']: # picks each neighbor(dict) from the list
-            list_of_neighs.append(list(neighs.keys())[0]) # store the index of the neighbor
-            edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]])) # (0,3)
+        for neighs in roi['neighbors']:  # picks each neighbor(dict) from the list
+            list_of_neighs.append(list(neighs.keys())[0])  # store the index of the neighbor
+            edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]]))  # (0,3)
             list_of_edges.append(edge_tuple)
-        list_of_edges = list(set(list_of_edges)) # [(0,1),(0,4)]
+        list_of_edges = list(set(list_of_edges))  # [(0,1),(0,4)]
 
         dict_of_edge_attributes = {}
         list_of_edge_attributes = []
         for edge in list_of_edges:
-            if edge[0] == index_: # For later use to extract distance
+            if edge[0] == index_:  # For later use to extract distance
                 n = edge[1]
             else:
                 n = edge[0]
 
-            for neighs2 in roi["neighbors"]: # picks each neighbor(dict) from the list
-                if list(neighs2.keys())[0] == n: # pick up the index of the neighbors
+            for neighs2 in roi["neighbors"]:  # picks each neighbor(dict) from the list
+                if list(neighs2.keys())[0] == n:  # pick up the index of the neighbors
                     dist = neighs2[n]["distance"]
             dict_of_edge_attributes[edge] = dist
             list_of_edge_attributes.append(dist)
