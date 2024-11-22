@@ -1,6 +1,7 @@
 import random
 import time
 import pandas as pd
+import numpy as np
 from gentl.gentl import gentl
 # from gentl import _ga_step2_parent_selection_by_fitness_evaluation_
 from gentl._ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance
@@ -40,7 +41,7 @@ def scalability_chromosome_length_wise():
             t_len_dict[length].append(time_taken)
             iters_len_dict[length].append(generation)
             best_chromosome = population[0]
-            best_distance = euclidean_distance(goal, best_chromosome)
+            best_distance = euclidean_distance(np.array(goal).flatten(), np.array(best_chromosome).flatten())
             if best_distance == 0.0:
                 print(f"Solution found for Chromosome Length {length} in max_generation {max_generations}")
                 print(f"Best chromosome: {best_chromosome}, Distance to goal: {best_distance}")
@@ -54,5 +55,5 @@ if __name__ == "__main__":
     t_len_dict, iters_len_dict=scalability_chromosome_length_wise()
     # Generate scalability plot:
     print(t_len_dict)
-    scalability_cr_len_iters_df=pd.DataFrame(iters_len_dict)
-    scalability_cr_len_iters_df.to_csv("scalability_cr_len_iters_df.csv", index=False)
+    # scalability_cr_len_iters_df=pd.DataFrame(iters_len_dict)
+    # scalability_cr_len_iters_df.to_csv("scalability_cr_len_iters_df.csv", index=False)
