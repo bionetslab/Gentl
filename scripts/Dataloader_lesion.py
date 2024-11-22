@@ -110,6 +110,7 @@ class BladderCancerROIDataset(Dataset):
     def _extract_all_rois(self):
         roi_samples = []
         cancer_samples = []
+        neighbour_parm = "knn" # or dist_threshold
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -117,7 +118,7 @@ class BladderCancerROIDataset(Dataset):
             ct_folder = sample['ct_folder']
 
             rois, cancer_roi, cancer_coordinates, cancer_neighbors = extract_non_cancer_rois(
-                ct_folder, image, mask, self.roi_width, self.roi_height,
+                neighbour_parm,ct_folder, image, mask, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
 
@@ -169,7 +170,7 @@ class BladderCancerROIDataset(Dataset):
             'neighbors': sample['neighbors'],  # neighbors of each roi
             'time_point': sample['time_point'],  # cancer stage
             'ct_folder': sample['ct_folder'],  # folder name
-            'case_type': sample['case_type']  # lesion
+            'case_type': "Control"  # lesion
             }
 
     def get_cancer_samples(self):

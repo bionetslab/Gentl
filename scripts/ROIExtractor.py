@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 
-def extract_non_cancer_rois(ct_folder, image, mask, roi_width, roi_height, overlap, max_rois=None):
+def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi_height, overlap, max_rois=None):
     """
     Extract non-cancer ROIs from the image with specified overlap.
 
@@ -42,7 +42,7 @@ def extract_non_cancer_rois(ct_folder, image, mask, roi_width, roi_height, overl
 
             if max_rois and len(rois) >= max_rois:
                 if max_rois > 1:
-                    neighbors = compute_neighbors(locations)
+                    neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
                     # Update each entry in `rois` to include its corresponding neighbors
                     rois = [
                         (roi, coordinates, neighbors[idx])
@@ -55,10 +55,10 @@ def extract_non_cancer_rois(ct_folder, image, mask, roi_width, roi_height, overl
                         ]
                 c_roi, c_coordinates = extract_cancer_roi(image, mask)
                 locations.append(c_coordinates)
-                c_neighbors = compute_neighbors(locations, True)
+                c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations,True)
                 return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
     if max_rois > 1:
-        neighbors = compute_neighbors(locations)
+        neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
         # Update each entry in `rois` to include its corresponding neighbors
         rois = [
             (roi, coordinates, neighbors[idx])
@@ -71,7 +71,7 @@ def extract_non_cancer_rois(ct_folder, image, mask, roi_width, roi_height, overl
             ]
     c_roi, c_coordinates = extract_cancer_roi(image, mask)
     locations.append(c_coordinates)
-    c_neighbors = compute_neighbors(locations, True)
+    c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations,True)
     return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
 
 
@@ -216,28 +216,33 @@ def distance_threshold(locations, cancer_roi=False):
     :return:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
-    threshold_dist = 200
+    threshold_dist = 100
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
 
     if cancer_roi:
-        distances, indices = kdt_tree.query_radius(
+        indices, distances = kdt_tree.query_radius(
             [roi_coordinates[-1]], r=threshold_dist, return_distance=True
             )  # return neighbors within the distance
-        neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
-        neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
+        # neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
+        # neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
         neighbors_dict = {
             len(roi_coordinates) - 1: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
-                                       for idx, dist in zip(neighbor_indices.ravel(), neighbor_distances.ravel())]
+                                       for idx, dist in zip(indices.ravel(), distances.ravel()) if idx != len(roi_coordinates)-1]
             }  # zip two lists and access the corresponding values
     else:
-        distances, indices = kdt_tree.query_radius(roi_coordinates, r=threshold_dist, return_distance=True)
-        neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
-        neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
+        indices, distances = kdt_tree.query_radius(roi_coordinates, r=threshold_dist, return_distance=True)
+        # neighbor_indices = indices[:, 1:]  # Remove first column (self-reference)
+        # neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
         # for each roi in roi_coordinates, store its neighbor and the distance as key value pair
         neighbors_dict = {
             i: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
-                for idx, dist in zip(neighbor_indices[i], neighbor_distances[i])]
+                for idx, dist in zip(indices[i], distances[i]) if idx != i]
             for i in range(len(roi_coordinates))
             }  # zip two lists and access the corresponding values
     return neighbors_dict
+
+# neighbors_dict = {
+#     i: [{int(idx): {'distance': float(dist), 'coordinates': points[int(idx)]}}
+#         for idx, dist in zip(all_nn_indices[i], distances[i]) if idx != i ] for i in range(len(points))
+#     }
