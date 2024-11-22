@@ -20,7 +20,7 @@ def scalability_chromosome_length_wise():
     iters_across_lengths=[]*len(lengths)
     t_len_dict=dict(zip(lengths, t_across_lengths))
     iters_len_dict = dict(zip(lengths, iters_across_lengths))
-    no_of_iters=10
+    no_of_iters=20
 
     for length in lengths:
         t_len_dict[length]=[]

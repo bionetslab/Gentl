@@ -41,6 +41,8 @@ def test_patient_gmm(patient_id, patient_results, variable_name):
     plt.xlabel(variable_name.capitalize())
     plt.ylabel('Density')
     plt.legend()
+    # pdf_path = f'/Users/wushengyang/Desktop/Patient_{patient_id}_{variable_name}_GMM.pdf'
+    # plt.savefig(pdf_path)
     plt.show()
 
     # Print lists of original and converted values

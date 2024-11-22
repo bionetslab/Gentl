@@ -31,4 +31,4 @@ dissimilarity_results = process_variable_gmm(dissimilarity_df, 'dissimilarity')
 # save_results_to_csv(contrast_results, 'contrast')
 # save_results_to_csv(homogeneity_results, 'homogeneity')
 
-test_patient_gmm('CT-073', dissimilarity_results, 'dissimilarity')
+test_patient_gmm('CT-009', dissimilarity_results, 'dissimilarity')
