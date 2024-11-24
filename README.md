@@ -11,6 +11,12 @@ This is a repository that contains information on how to reproduce results corre
 
 <!------------------>
 
+# Abstract
+
+This is a repository that contains information on how to reproduce results corresponding to the *bladder cancer* case study reported in [Paper title](https://paper-doi-when-available).
+
+<!------------------>
+
 # Data
 
 ![fig2-bladder-paper](fig2-bladder-paper.png)
@@ -39,6 +45,7 @@ Data will be made available under reasonable request to the corresponding author
 
 ![github-otsus-thresholding](github-otsus-thresholding.jpeg)
 
+<br/>
 
 ## Overall ROI bounding box selection
 
@@ -54,6 +61,34 @@ Done using hyperparameter that takes as input the choice of the user, as follows
 
 ![github-overall-roi-bounding-box-selection](github-overall-roi-bounding-box-selection.jpeg)
 
+
+## Smaller ROI bounding box selection from healthy tissue
+
+Smaller ROI bounding box selection is done using a sliding window implementation, from healthy areas of the tissue, features extracted from which are subsequently used as the initial population for the genetic algorithm.
+
+Note that the feature extracted from the cancer ROI of the same image is subsequently used as the target (also known as, goal) for the genetic algorithm.
+
+Reported results have used initial population size as {10, 20, 50, 100, 500, 1000}. Reported results have also healthy areas with constant size across the image samples, although this was not really necessary since we are using GLCM texture features from the ROIs and not the ROIs themselves as input to the genetic algorithm.
+
+<!------------------>
+
+# Feature extraction
+
+The following five GLCM features were extracted from the cancer ROI, as well as healthy ROIs from the same patient:
+
+- Dissimilarity (read more about *GLCM dissimilarity* [Paper title](https://paper-doi-when-available))
+- Correlation
+- Energy
+- Contrast
+- Homogeneity
+
+## Description
+
+- As described in our [paper](https://www.mdpi.com/2072-6694/15/6/1673), the data used for our analyses comprised a total of 100 CT scans of the bladder, each from a patient with bladder cancer.
+
+- Disease: urothelial carcinoma of the bladder
+
+- Stages: Ta, Tis, T0, T1, T2, T3, T4
 
 
 
