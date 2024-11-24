@@ -97,7 +97,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 <!------------------>
 
-# Installation
+# Genetic algorithm
 
 Install conda environment as follows (there also exists a requirements.txt)
 ```bash
