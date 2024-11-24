@@ -64,11 +64,11 @@ Done using hyperparameter that takes as input the choice of the user, as follows
 
 ## Smaller ROI bounding box selection from healthy tissue
 
-Smaller ROI bounding box selection is done using a sliding window implementation, from healthy areas of the tissue, features extracted from which are subsequently used as the initial population for the genetic algorithm.
+Smaller ROI bounding box selection is done using a sliding window implementation, from healthy areas of the tissue, binarized features extracted from which are subsequently used as the initial population for the genetic algorithm.
 
-Note that the feature extracted from the cancer ROI of the same image is subsequently used as the target (also known as, goal) for the genetic algorithm.
+Note that the binarized feature extracted from the cancer ROI of the same image is subsequently used as the target (also known as, goal) for the genetic algorithm.
 
-Reported results have used initial population size as {10, 20, 50, 100, 500, 1000}. Reported results have also healthy areas with constant size across the image samples, although this was not really necessary since we are using GLCM texture features from the ROIs and not the ROIs themselves as input to the genetic algorithm.
+Reported results have used initial population size as {10, 20, 50, 100, 500, 1000}. Reported results have also healthy areas with constant size across the image samples, although this was not really necessary since we are using binarized GLCM texture features from the ROIs and not the ROIs themselves as input to the genetic algorithm.
 
 <!------------------>
 
@@ -84,14 +84,12 @@ The following five GLCM features were extracted from the cancer ROI, as well as 
 
 using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac{3\pi}{4} \}$; $5$ distances: $\{1, 2, 3,5, 7\}$ pixels).
 
-## Description
+<!------------------>
 
-- As described in our [paper](https://www.mdpi.com/2072-6694/15/6/1673), the data used for our analyses comprised a total of 100 CT scans of the bladder, each from a patient with bladder cancer.
+# Feature binarization
 
-- Disease: urothelial carcinoma of the bladder
-
-- Stages: Ta, Tis, T0, T1, T2, T3, T4
-
+- Performed on the cancer ROI using Gaussian mixture model. All feature values that are closer in Euclidean distance to lower mean ($\mu_1$) is assigned a value of $0$, else $1$.
+- All healthy ROI feature values from the same image sample are assigned a value of $0$ if they are closer in Euclidean distance to the lower mean ($\mu1$) of the above calculated 
 
 
 <!------------------>
