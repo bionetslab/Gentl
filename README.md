@@ -76,11 +76,13 @@ Reported results have used initial population size as {10, 20, 50, 100, 500, 100
 
 The following five GLCM features were extracted from the cancer ROI, as well as healthy ROIs from the same patient:
 
-- Dissimilarity (read more about *GLCM dissimilarity* [Paper title](https://paper-doi-when-available))
+- Dissimilarity
 - Correlation
 - Energy
 - Contrast
-- Homogeneity
+- Homogeneity,
+
+using $20$ configurations (angles: $\{\frac{pi}{2}, \pi, \frac{3\pi}{2}, 2\pi\}$ )
 
 ## Description
 
