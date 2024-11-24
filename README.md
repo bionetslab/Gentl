@@ -37,6 +37,24 @@ Data will be made available under reasonable request to the corresponding author
 
 ## Otsu's thresholding
 
+![github-otsus-thresholding](github-otsus-thresholding.jpg)
+
+
+## Overall ROI bounding box selection
+
+Done using hyperparameter that takes as input the choice of the user, as follows:
+
+- Mode 1: Circum-rectangle
+
+- Mode 2: Inner rectangle derived using elipse
+
+- Mode 3 (default): In-rectangle
+
+
+![github-overall-roi-bounding-box-selection](github-overall-roi-bounding-box-selection.jpg)
+
+
+
 
 <!------------------>
 
