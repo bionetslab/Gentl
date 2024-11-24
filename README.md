@@ -138,7 +138,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 ### Step 4: Mutation (final offspring generation)
 
-- Initial offspring ${o_{1,2}}^'$ generated from parents $p_1$ and $p_2$ in step 3 (crossover) described above, undergoes mutation to give rise to final offspring $o_{1,2}$.
+- Initial offspring ${o_{1,2}}^\'$ generated from parents $p_1$ and $p_2$ in step 3 (crossover) described above, undergoes mutation to give rise to final offspring $o_{1,2}$.
 
 
 <!------------------>
