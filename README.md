@@ -99,9 +99,46 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 # Genetic algorithm
 
+## General information about our implementation of the algorithm
+
+- We perform the genetic algorithm on each sample image separately.
+
+
 ## An overview of the terms *gene*, *chromosome* and *population*
 
 ![github-gene-chromosome-population](github-gene-chromosome-population.jpeg)
+
+
+## Algorithmic workflow
+
+![github-pictorial-description-of-genetic-algorithm](github-pictorial-description-of-genetic-algorithm.jpeg)
+
+
+### Step 1: Population initialization
+
+- The initial population ($P$) comprises binarized GLCM features extracted from the healthy ROIs.
+
+- Reported results include $P=\{10, 20, 50, 100, 500, 1000\}$.
+
+
+### Step 2: Parent selection by fitness evaluation
+
+- Fitness metric: Euclidean distance to target.
+	- In our implementation target is binarized feature list from cancer ROI.
+
+- Parent selection rate: $50\%$ of the population at the end of iteration *$i$* is retained as parents for iteration *$i+1$*. Therefore, list of selected parents contains top $50\%$ of the chromosomes closest to the target sequence.
+
+### Step 3: Crossover (initial offspring generation)
+
+- For crossover between two parents:
+	- The first parent ($p_1$) is always chosen from the top $50\%$ of chromosomes (that is, ones having least Euclidean distance to the target sequence).
+	- The second parent ($p_2$) is chosen from the initial population at each iteration.
+
+- Random portions of parents $p_1$ and $p_2$ constitute the respective child--with at least one gene compulsorily selected from each parent $\{p_1$ and $p_2\}$.
+
+### Step 4: Mutation (final offspring generation)
+
+- Initial offspring ${o_{1,2}}^'$ generated from parents $p_1$ and $p_2$ in step 3 (crossover) described above, undergoes mutation to give rise to final offspring ${o_{1,2}}$.
 
 
 <!------------------>
