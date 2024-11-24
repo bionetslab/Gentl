@@ -50,6 +50,7 @@ Done using hyperparameter that takes as input the choice of the user, as follows
 
 - Mode 3 (default): In-rectangle
 
+<br/>
 
 ![github-overall-roi-bounding-box-selection](github-overall-roi-bounding-box-selection.jpeg)
 
