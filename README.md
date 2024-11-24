@@ -130,6 +130,8 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 ### Step 3: Crossover (initial offspring generation)
 
+![github-crossover](github-crossover.jpeg)
+
 - For crossover between two parents:
 	- The first parent ($p_1$) is always chosen from the top $50\%$ of chromosomes (that is, ones having least Euclidean distance to the target sequence).
 	- The second parent ($p_2$) is chosen from the initial population at each iteration.
