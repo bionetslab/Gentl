@@ -89,7 +89,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 # Feature binarization
 
 - Performed on the cancer ROI using Gaussian mixture model. All feature values that are closer in Euclidean distance to lower mean ($\mu_1$) is assigned a value of $0$, else $1$.
-- All healthy ROI feature values from the same image sample are assigned a value of $0$ if they are closer in Euclidean distance to the lower mean ($\mu1$) of the above calculated 
+- All healthy ROI feature values from the same image sample are assigned a value of $0$ if they are closer in Euclidean distance to the lower mean ($\mu_1$) of the above calculated 
 
 
 <!------------------>
