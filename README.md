@@ -146,12 +146,12 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 - In the script */gentl/\_ga\_step5\_replacement.py*:
 	- Input parameters:
-    	- $\texttt{population}$: The current population.
-    	- $\texttt{new_generation}$: The new generation of chromosomes.
-    	- $\texttt{goal}$: The target sequence.
+    	- `population`: The current population.
+    	- `new\_generation`: The new generation of chromosomes.
+    	- `goal`: The target sequence.
 
     - Returns:
-    	- $\texttt{best\_individuals}$: The updated population containing the best individuals.
+    	- `best\_individuals`: The updated population containing the best individuals.
 
 
 <!------------------>
