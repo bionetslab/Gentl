@@ -82,7 +82,7 @@ The following five GLCM features were extracted from the cancer ROI, as well as 
 - Contrast
 - Homogeneity,
 
-using $20$ configurations (angles $=\{\frac{\pi}{2}, \pi, \frac{3\pi}{2}, 2\pi\}$; distances $=\{\frac{\pi}{2}, \pi, \frac{3\pi}{2}, 2\pi\}$)
+using $20$ configurations ($4$ angles $=\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac{3\pi}{4} \}$; $5$ distances $=\{1, 2, 3,5, 7\}$ pixels).
 
 ## Description
 
