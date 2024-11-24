@@ -144,14 +144,14 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 - In this step, we replace the worst-performing individuals in the current population with new offspring, retaining the better-performing individuals.
 
-- In the script **:
+- In the script */gentl/\_ga\_step5\_replacement.py*:
 	- Input parameters:
     	- $\texttt{population}$: The current population.
-    	- new\_generation: The new generation of chromosomes.
-    	- goal: The target sequence.
+    	- $\texttt{new\_generation}$: The new generation of chromosomes.
+    	- $\texttt{goal}$: The target sequence.
 
     - Returns:
-    	- best_individuals: The updated population containing the best individuals.
+    	- $\texttt{best\_individuals}$: The updated population containing the best individuals.
 
 
 <!------------------>
