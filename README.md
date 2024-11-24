@@ -13,17 +13,29 @@ This is a repository that contains information on how to reproduce results corre
 
 # Data
 
-## Overview
-
----
+![fig2-bladder-paper](fig2-bladder-paper.png)
 
 ## Description
 
----
+- As described in our [paper](https://www.mdpi.com/2072-6694/15/6/1673), the data used for our analyses comprised a total of 100 CT scans of the bladder, each from a patient with bladder cancer.
+
+- Disease: urothelial carcinoma of the bladder
+
+- Stages: Ta, Tis, T0, T1, T2, T3, T4
+
+- Stage annotation technique: Performed manually by radiologists
+
+For more details, interested readers are directed to the **Dataset** section of the [paper](https://www.mdpi.com/2072-6694/15/6/1673).
 
 ## Availability
 
-Data will be made available under reasonable request to the corresponding author, [Suryadipto Sarkar](suryadipto.sarkar@fau.de) (more contact details below).
+Data will be made available under reasonable request to the corresponding author, <a href="mailto:suryadipto.sarkar@fau.de">Suryadipto Sarkar</a> (more contact details below).
+
+<!------------------>
+
+# Data preprocessing
+
+## Otsu's thresholding
 
 
 <!------------------>
