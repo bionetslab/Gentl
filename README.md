@@ -134,7 +134,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 	- The first parent ($p_1$) is always chosen from the top $50\%$ of chromosomes (that is, ones having least Euclidean distance to the target sequence).
 	- The second parent ($p_2$) is chosen from the initial population at each iteration.
 
-- Random portions of parents $p_1$ and $p_2$ constitute the respective child--with at least one gene compulsorily selected from each parent $\{p_1$, $p_2\}$.
+- Random portions of parents $p_1$ and $p_2$ constitute the respective child--with at least one gene compulsorily selected from each parent .
 
 ### Step 4: Mutation (final offspring generation)
 
