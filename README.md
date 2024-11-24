@@ -146,7 +146,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 
 - In the script **:
 	- Input parameters:
-    	- \texttt{population}: The current population.
+    	- $\texttt{population}$: The current population.
     	- new\_generation: The new generation of chromosomes.
     	- goal: The target sequence.
 
