@@ -147,7 +147,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 - In the script */gentl/\_ga\_step5\_replacement.py*:
 	- Input parameters:
     	- $\texttt{population}$: The current population.
-    	- $\texttt{new\_generation}$: The new generation of chromosomes.
+    	- $\texttt{new_generation}$: The new generation of chromosomes.
     	- $\texttt{goal}$: The target sequence.
 
     - Returns:
