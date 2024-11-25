@@ -1229,9 +1229,9 @@ Note: Every image comprises many healthy ROIs and only one cancer ROI. Upon conv
 
 ### Methods of converting from spatial to network domain:
 
-- i. Delaunay triangulation (non-parametric)
-- ii. k-Nearest Neighbor (kNN) graph (parametric; parameter $k$ specifies no. of neighbors per node)
-- iii. distance threshold graph (parametric; parameter $distance$ specifies absolute distance in pixel)
+i. Delaunay triangulation (non-parametric)
+ii. k-Nearest Neighbor (kNN) graph (parametric; parameter $k$ specifies no. of neighbors per node)
+iii. distance threshold graph (parametric; parameter $distance$ specifies absolute distance in pixel)
 
 <!------------------>
 
