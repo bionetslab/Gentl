@@ -1,5 +1,7 @@
 ![Gentl](Gentl-icon.jpeg)
 
+![spatial-to-network-domain](spatial-to-network-domain.jpeg)
+
 # Gentl
 The source code for Gentl (<ins>GEN</ins>e<ins>T</ins>ic a<ins>L</ins>gorithm for predicting stage and grade from medical scans of patients with cancer) [[access preprint](doi-when-available)].
 
@@ -1225,7 +1227,7 @@ CT-051	2.425990406326662
 
 Note: Every image comprises many healthy ROIs and only one cancer ROI. Upon conversion to network domain, the network pertaining to the image subsequently contains many healthy ROI nodes but only one cancer node. (Each node in the network corresponds to an ROI segment in the image.)
 
-![spatial-to-network-domain](spatial-to-network-domain.jpeg)
+<!--![spatial-to-network-domain](spatial-to-network-domain.jpeg)-->
 
 ### Methods of converting from spatial to network domain:
 
