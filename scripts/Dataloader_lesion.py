@@ -47,6 +47,8 @@ class BladderCancerDataset(Dataset):
                         # print("Case type", case_type, dcm_file)
                     elif file.endswith('.png'):
                         mask_file = os.path.join(case_path, file)
+                    elif file.endswith('.jpg'): # image with background pixel as 0
+                        image_with_zero_background = os.path.join(case_path, file)
                     # elif file == 'coords.txt':
                     #     coords_file = os.path.join(case_path, file)
 
@@ -56,6 +58,7 @@ class BladderCancerDataset(Dataset):
                             'dcm': dcm_file,
                             'mask': mask_file,
                             # 'coords': coords_file,
+                            "background_masked_image": image_with_zero_background, # image with background pixel as 0
                             'time_point': time_point,
                             'ct_folder': ct_folder,
                             'case_type': case_type
@@ -76,11 +79,13 @@ class BladderCancerDataset(Dataset):
         mask = np.array(Image.open(sample['mask'])).astype(np.float32)
         mask = mask / 255.0
 
+        background_masked_image = np.array(Image.open(sample['background_masked_image']))
         # with open(sample['coords'], 'r') as f:
         #     coords = f.read().strip()
 
         image = torch.from_numpy(image).unsqueeze(0)
         mask = torch.from_numpy(mask).unsqueeze(0)
+        background_masked_image = torch.from_numpy(background_masked_image).unsqueeze(0)
 
         # Apply transforms if any
         if self.transform:
@@ -90,6 +95,7 @@ class BladderCancerDataset(Dataset):
         return {
             'image': image,
             'mask': mask,
+            'background_masked_image': background_masked_image,
             # 'coords': coords,
             'time_point': sample['time_point'],
             'ct_folder': sample['ct_folder'],
@@ -115,10 +121,11 @@ class BladderCancerROIDataset(Dataset):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
             mask = sample['mask'].squeeze().numpy()
+            background_masked_image = sample['background_masked_image'].squeeze().numpy()
             ct_folder = sample['ct_folder']
 
             rois, cancer_roi, cancer_coordinates, cancer_neighbors = extract_non_cancer_rois(
-                neighbour_parm,ct_folder, image, mask, self.roi_width, self.roi_height,
+                neighbour_parm,ct_folder, image, mask,background_masked_image, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
 
@@ -298,8 +305,8 @@ base_dataset = BladderCancerDataset(
 roi_per_image = 10
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
-    roi_width=20,
-    roi_height=20,
+    roi_width=15,
+    roi_height=15,
     overlap=0.25,
     max_rois_per_image=roi_per_image
     )

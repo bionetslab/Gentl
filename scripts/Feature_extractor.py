@@ -18,11 +18,12 @@ def extract_features(selected_method, roi_per_image=2):
 
     roi_dataset = BladderCancerROIDataset(
         base_dataset,
-        roi_width=128,
-        roi_height=128,
-        overlap=0.25,
+        roi_width=20,
+        roi_height=20,
+        overlap=0.15,
         max_rois_per_image=roi_per_image
         )
+
     cancer_rois_dataset = roi_dataset.get_cancer_samples()
     feature_results = {}
 
@@ -57,7 +58,7 @@ def extract_features(selected_method, roi_per_image=2):
     return feature_results
 
 
-max_roi_per_image = 5
+max_roi_per_image = 100
 selected_method = "GLCM"  # select the method for feature extraction
 extracted_features = extract_features(selected_method, max_roi_per_image)
 extracted_features_df = pd.DataFrame(extracted_features).T
@@ -127,8 +128,8 @@ Energy = pd.concat(Energy, axis=0)
 Contrast = pd.concat(Contrast, axis=0)
 Homogeneity = pd.concat(Homogeneity, axis=0)
 # ---
-# Dissimilarity.to_csv("glcm_dissimilarity_features.csv")
-# Correlation.to_csv("glcm_correlation_features.csv")
-# Energy.to_csv("glcm_energy_features.csv")
-# Contrast.to_csv("glcm_contrast_features.csv")
-# Homogeneity.to_csv("glcm_homogeneity_features.csv")
+# Dissimilarity.to_csv("glcm_dissimilarity_features_100_rois.csv")
+# Correlation.to_csv("glcm_correlation_features_100_rois.csv")
+# Energy.to_csv("glcm_energy_features_100_rois.csv")
+# Contrast.to_csv("glcm_contrast_features_100_rois.csv")
+# Homogeneity.to_csv("glcm_homogeneity_features_100_rois.csv")

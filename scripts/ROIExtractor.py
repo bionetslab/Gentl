@@ -1,3 +1,4 @@
+import os
 from ast import literal_eval
 
 import pandas as pd
@@ -6,7 +7,8 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 
-def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi_height, overlap, max_rois=None):
+def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary, roi_width, roi_height, overlap,
+                            max_rois=None):
     """
     Extract non-cancer ROIs from the image with specified overlap.
 
@@ -21,7 +23,7 @@ def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi
     Returns:
     list: List of extracted ROI arrays.
     """
-    query = "outer_rect_coordinates" if max_rois > 100 else "inner_rect_coordinates"
+    query = "outer_rect_coordinates" if max_rois >= 500 else "inner_rect_coordinates"
     x_, y_, w_, h_ = get_coordinates_from_csv(ct_folder, query)
     # h, w = image.shape  # (512,512)
     stride_y = int(roi_height * (1 - overlap))
@@ -33,16 +35,19 @@ def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi
         for x in range(x_, w_ - roi_width + 1, stride_x):
             roi = image[y:y + roi_height, x:x + roi_width]
             roi_mask = mask[y:y + roi_height, x:x + roi_width]
+            background_masked_image = out_boundary[y:y + roi_height, x:x + roi_width]
 
             # Check if the ROI is completely non-cancer
-            if np.sum(roi_mask) == 0:
+            if np.sum(roi_mask) == 0 and np.count_nonzero(background_masked_image) / background_masked_image.size >= 0.80:
                 coordinates = (y, x, y + roi_height, x + roi_width)  # (y1,x1,y2,x2)
                 locations.append((y, x, y + roi_height, x + roi_width))  # store all the coordinates of rois per image
                 rois.append((roi, coordinates))  # tuple with roi and coordinates
 
             if max_rois and len(rois) >= max_rois:
                 if max_rois > 1:
-                    neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
+                    neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(
+                        locations
+                        )
                     # Update each entry in `rois` to include its corresponding neighbors
                     rois = [
                         (roi, coordinates, neighbors[idx])
@@ -55,7 +60,10 @@ def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi
                         ]
                 c_roi, c_coordinates = extract_cancer_roi(image, mask)
                 locations.append(c_coordinates)
-                c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations,True)
+                c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(
+                    locations, True
+                    )
+                #visualize_non_cancerous_region(image, locations[:-1], ct_folder)
                 return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
     if max_rois > 1:
         neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
@@ -71,7 +79,8 @@ def extract_non_cancer_rois(neighbor_parm,ct_folder, image, mask, roi_width, roi
             ]
     c_roi, c_coordinates = extract_cancer_roi(image, mask)
     locations.append(c_coordinates)
-    c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations,True)
+    c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations, True)
+    #visualize_non_cancerous_region(image, locations[:-1], ct_folder)
     return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
 
 
@@ -80,7 +89,7 @@ def extract_cancer_roi(image, mask):
     bbox = compute_bounding_box(mask)
     r_min, c_min, r_max, c_max = bbox  # (y1,x1,y2,x2)
     cancer_roi = image[r_min:r_max, c_min:c_max]  # Slice the cancer region within image
-
+    # print(f"cancer{cancer_roi.shape}")
     return cancer_roi, bbox
 
 
@@ -216,7 +225,7 @@ def distance_threshold(locations, cancer_roi=False):
     :return:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
-    threshold_dist = 600
+    threshold_dist = 300
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
 
@@ -228,7 +237,8 @@ def distance_threshold(locations, cancer_roi=False):
         # neighbor_distances = distances[:, 1:]  # Remove first column (self-reference)
         neighbors_dict = {
             len(roi_coordinates) - 1: [{int(idx): {'distance': float(dist), 'coordinates': locations[int(idx)]}}
-                                       for idx, dist in zip(indices[0], distances[0]) if idx != len(roi_coordinates)-1]
+                                       for idx, dist in zip(indices[0], distances[0]) if
+                                       idx != len(roi_coordinates) - 1]
             }  # zip two lists and access the corresponding values
     else:
         indices, distances = kdt_tree.query_radius(roi_coordinates, r=threshold_dist, return_distance=True)
@@ -242,7 +252,51 @@ def distance_threshold(locations, cancer_roi=False):
             }  # zip two lists and access the corresponding values
     return neighbors_dict
 
+
 # neighbors_dict = {
 #     i: [{int(idx): {'distance': float(dist), 'coordinates': points[int(idx)]}}
 #         for idx, dist in zip(all_nn_indices[i], distances[i]) if idx != i ] for i in range(len(points))
 #     }
+
+
+def visualize_non_cancerous_region(image, bbox, ct_folder):
+    """
+    Visualizes a non-cancerous region with bounding boxes on a grayscale image and saves it to a file.
+
+    Args:
+    - image: 2D array-like grayscale image.
+    - bbox: List of bounding boxes, where each box is a tuple (rmin, cmin, rmax, cmax).
+    - ct_folder: Folder containing CT scans (for logging or processing purposes).
+    - output_folder: Folder where the output image will be saved.
+    - filename: Name of the output file (default is "output.png").
+    """
+    # print(ct_folder)
+    print(len(set(bbox)))
+
+    output_folder = "../data/with_500_outer_with_20_bounding_boxes"
+    filename = f"{ct_folder}.jpg"
+    output_path = os.path.join(output_folder, filename)
+
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.imshow(image, cmap='gray')
+
+    # Add bounding boxes
+    for region in bbox:
+        rmin, cmin, rmax, cmax = region
+        ax.add_patch(
+            plt.Rectangle(
+                (cmin, rmin), cmax - cmin, rmax - rmin,
+                fill=False, edgecolor='red', linewidth=1
+            )
+        )
+
+    # Remove axis labels, ticks, and spines
+    ax.axis('off')
+
+    # Save the plot to a file
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)  # Close the figure to free resources
