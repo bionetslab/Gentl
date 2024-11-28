@@ -41,8 +41,8 @@ def run_gentl_for_feature(feature_name, feature_df, Np_cap=10, alpha=0.1, max_ge
         g = [0, 1]
 
         # Run the genetic algorithm
-        best_individual, generation = gentl(Np_cap, alpha, goal_labels, g, max_generations, copy=True,
-                                            fitness_threshold=fitness_threshold, p=initial_population)
+        best_individual, generation, _ = gentl(Np_cap, alpha, goal_labels, g, max_generations, copy=True,
+                                            fitness_threshold=fitness_threshold, mu=1, p=initial_population)
 
         # Convert the best individual to a 1D array
         best_individual = np.array(best_individual).flatten()
@@ -172,7 +172,7 @@ def average_distance_results_over_trials(feature_name, feature_df, num_trials=20
 # Run the test of gentl and GMM integration
 if __name__ == "__main__":
     # Example of running gentl with any feature
-    feature_df = pd.read_csv('../Gentl/scripts/glcm_dissimilarity_features.csv')
+    feature_df = pd.read_csv('../Gentl/scripts/glcm_dissimilarity_features_50_rois.csv')
     feature_name = 'dissimilarity'  # You can change this to 'correlation', 'energy', 'contrast', or 'homogeneity'
 
     # feature_df = pd.read_csv('../Gentl/scripts/glcm_correlation_features.csv')
@@ -185,14 +185,15 @@ if __name__ == "__main__":
     # feature_name = 'homogeneity'
 
     # Sort and display patients by distance
-    optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, max_generations=8)
-    sorted_by_distance = sort_patients_by_distance(optimization_distance_results)
-    print("\nSorted results by distance between best individual and goal:")
-    for result in sorted_by_distance:
-        print(f"Patient {result['patient_id']}, Distance to goal: {result['best_distance']}")
+    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, max_generations=8)
+    # sorted_by_distance = sort_patients_by_distance(optimization_distance_results)
+    # print("\nSorted results by distance between best individual and goal:")
+    # for result in sorted_by_distance:
+    #     print(f"Patient {result['patient_id']}, Distance to goal: {result['best_distance']}")
 
-    # Sort and display patients by generation
-    optimization_generation_results = run_gentl_for_feature(feature_name, feature_df, max_generations=50)
+    # Sort and display patients by generation:
+    # hint: set different Np_cap values for different number of rois: Np_cap≥rois
+    optimization_generation_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=50, alpha=0.05, max_generations=50, fitness_threshold=0.1)
     sorted_by_generation = sort_patients_by_generation(optimization_generation_results)
     print("\nSorted results by number of iterations:")
     for result in sorted_by_generation:
@@ -200,7 +201,7 @@ if __name__ == "__main__":
 
     # Run multiple trials and save average results to CSV
     # average_distance_results_over_trials(feature_name, feature_df, max_generations=8)
-    # average_generation_results_over_trials(feature_name, feature_df, max_generations=50)
+    # average_generation_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=80, alpha=0.05, max_generations=50, fitness_threshold=0.1)
 
 
 
