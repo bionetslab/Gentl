@@ -64,7 +64,7 @@ def test_extreme_mutation_rates():
     Np_cap = 20  # Population size cap
     max_generations = 200  # Maximum number of generations
     fitness_threshold = 0.5  # Stopping criterion for fitness
-    alpha_values = [0.001, 0.05, 0.1, 0.15, 0.9]  # Extreme mutation rates
+    alpha_values = [0.001, 0.05, 0.1, 0.15, 0.9]  # mutation rates
     no_of_runs = 20
 
     convergence_generations_extreme = []
@@ -119,7 +119,7 @@ def test_local_optima():
 
 def test_multiple_Np_caps_boxplots():
     """
-    Test: Multiple Runs for Different Np_cap Values (Boxplots for Final Iterations and Time Taken)
+    Test 4: Multiple Runs for Different Np_cap Values (Boxplots for Final Iterations and Time Taken)
     """
     goal = [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0]  # Target sequence
     g = [0, 1]  # Gene pool
