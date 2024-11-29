@@ -116,7 +116,7 @@ class BladderCancerROIDataset(Dataset):
     def _extract_all_rois(self):
         roi_samples = []
         cancer_samples = []
-        neighbour_parm = "dist_threshold" # or dist_threshold
+        neighbour_parm = "dist_threshold" # or dist_threshold or knn
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -177,7 +177,7 @@ class BladderCancerROIDataset(Dataset):
             'neighbors': sample['neighbors'],  # neighbors of each roi
             'time_point': sample['time_point'],  # cancer stage
             'ct_folder': sample['ct_folder'],  # folder name
-            'case_type': "Control"  # lesion
+            'case_type': "Control"  # control for healthy
             }
 
     def get_cancer_samples(self):
@@ -291,14 +291,6 @@ def visualize_dataset(dataset, num_samples=4):
     plt.show()
 
 
-# dataset = BladderCancerDataset(root_dir ='/home/as-aravinthakshan/Desktop/RESEARCH/explainable-cancer-staging-and-frading-from-images/data/preprocessed/Al-Bladder Cancer')
-# # sample = dataset[200]  # Get the first sample
-# # BladderCancerVisualizer.visualize_sample(sample)
-# dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
-# batch = next(iter(dataloader))
-# BladderCancerVisualizer.visualize_batch(batch)
-
-
 base_dataset = BladderCancerDataset(
     root_dir='../data/original/Al-Bladder Cancer'
     )
@@ -310,7 +302,7 @@ roi_dataset = BladderCancerROIDataset(
     overlap=0.25,
     max_rois_per_image=roi_per_image
     )
-print(len(roi_dataset))
+# print(len(roi_dataset))
 # for r in roi_dataset:
 #     print(r)
 cancer_roi_dataset = roi_dataset.get_cancer_samples()
@@ -318,26 +310,6 @@ full_roi_dataset = roi_dataset + cancer_roi_dataset
 
 # {(0, 1): 96.0, (0, 5): 96.0, (0, 6): 135.7645019878171, (1, 6): 96.0, (1, 2): 96.0, (1, 5): 135.7645019878171, (5, 6): 96.0, (6, 7): 96.0, (6, 10): 242.9588442514493, (2, 3): 96.0, (2, 7): 96.0, (3, 8): 96.0, (3, 4): 96.0, (3, 9): 135.7645019878171, (7, 8): 96.0, (7, 10): 205.73040611440985, (8, 4): 135.7645019878171, (8, 9): 96.0, (8, 10): 209.88806540630173, (4, 9): 96.0}
 
-# def createList(r1, r2):
-#     return [item for item in range(r1, r2 + 1)]
-# r1, r2 = 1, len(roi_dataset)
-# print(createList(r1, r2))
-
-# for r in roi_dataset:
-#
-#     spatial_knn_network = nx.Graph()
-#     edge_list = []
-#
-#     for roi in r:
-#
-#
-#
-#     spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"], neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'], case_type=r['case_type'])
-#     list_of_neighs=[]
-#     for no_of_neighs in range(len(r['neighbors'])):
-#         edge_tuple=(r["index"])
-
-#
 
 patient_labels = []
 for r in full_roi_dataset:
@@ -366,10 +338,6 @@ for patient_label in patient_labels:
             graph_name + ".add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])"
             )
 
-        # spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"],
-        #                              neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'],
-        #                              case_type=r['case_type'])
-
         list_of_edges = []
         list_of_neighs = []
         for neighs in roi['neighbors']:  # picks each neighbor(dict) from the list
@@ -393,19 +361,3 @@ for patient_label in patient_labels:
             list_of_edge_attributes.append(dist)
 
             exec(graph_name + ".add_edge(edge[0],edge[1], spatial_distance=dist)")
-
-        # list_of_edges.append()
-
-        # for no_of_neighs in range(len(r['neighbors'])):
-        #     edge_tuple = tuple(sorted(r["index"]))
-
-    # edge_list = []
-    #
-    # for roi in r:
-    #
-    #
-    #
-    # spatial_knn_network.add_node(r["index"], image=r["image"], coordinates=r["coordinates"], neighbors=r['neighbors'], time_point=r['time_point'], ct_folder=r['ct_folder'], case_type=r['case_type'])
-    # list_of_neighs=[]
-    # for no_of_neighs in range(len(r['neighbors'])):
-    #     edge_tuple=(r["index"])

@@ -235,11 +235,11 @@ def compute_neighbors(locations, cancer_roi=False):
 
 def get_coordinates_from_csv(ct_folder, query):
     """
-    From the csv file return x,y,width,height of rectangular area within each image to extract features
+    From the csv file return x,y,width,height of bounding rectangular area within each image to extract features
 
     Arguments:
     ct_folder: patient_id or filename
-    query: use inner rectangle or outer rectangle for roi selection
+    query (string): outer_rect_coordinates or inner_rect_coordinates for roi selection
 
     Returns:
     cod (tuple): x,y,width,height of rectangular area
@@ -298,9 +298,9 @@ def distance_threshold(locations, cancer_roi=False):
 
 def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     """
-    Visualizes a non-cancerous region with bounding boxes on a grayscale image and saves it to a file.
+    Visualizes a non-cancerous regions with bounding boxes on a grayscale image and saves it to a file.
 
-    Args:
+    Arguments:
     - image: 2D array-like grayscale image.
     - bbox: List of bounding boxes, where each box is a tuple (rmin, cmin, rmax, cmax).
     - ct_folder: Folder containing CT scans (for logging or processing purposes).
