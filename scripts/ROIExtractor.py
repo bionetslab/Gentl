@@ -12,9 +12,12 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     """
     Extract non-cancer ROIs from the image with specified overlap.
 
-    Args:
+    Arguments:
+    neighbor_parm: Specifies the method for determining neighbors of (ROIs)
+    ct_folder: Specifies the patient_id or filename
     image (numpy.ndarray): Input image array.
     mask (numpy.ndarray): Binary mask where 1 indicates cancer regions.
+    out_boundary (numpy.ndarray): Image array where backgrounds are marked with pixel values set to 0.
     roi_width (int): Width of the ROI to extract.
     roi_height (int): Height of the ROI to extract.
     overlap (float): Overlap between ROIs, value between 0 and 1.
@@ -23,7 +26,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     Returns:
     list: List of extracted ROI arrays.
     """
-    query = "outer_rect_coordinates" if max_rois >= 500 else "inner_rect_coordinates"
+    query = "outer_rect_coordinates" if max_rois >= 500 else "inner_rect_coordinates" # decides which rectangular region to select for roi selection
     x_, y_, w_, h_ = get_coordinates_from_csv(ct_folder, query)
     # h, w = image.shape  # (512,512)
     stride_y = int(roi_height * (1 - overlap))
@@ -259,7 +262,7 @@ def distance_threshold(locations, cancer_roi=False):
 #     }
 
 
-def visualize_non_cancerous_region(image, bbox, ct_folder):
+def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     """
     Visualizes a non-cancerous region with bounding boxes on a grayscale image and saves it to a file.
 
@@ -267,11 +270,9 @@ def visualize_non_cancerous_region(image, bbox, ct_folder):
     - image: 2D array-like grayscale image.
     - bbox: List of bounding boxes, where each box is a tuple (rmin, cmin, rmax, cmax).
     - ct_folder: Folder containing CT scans (for logging or processing purposes).
-    - output_folder: Folder where the output image will be saved.
-    - filename: Name of the output file (default is "output.png").
     """
     # print(ct_folder)
-    print(len(set(bbox)))
+    # print(len(set(bbox)))
 
     output_folder = "../data/with_500_outer_with_20_bounding_boxes"
     filename = f"{ct_folder}.jpg"
@@ -299,4 +300,4 @@ def visualize_non_cancerous_region(image, bbox, ct_folder):
 
     # Save the plot to a file
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
-    plt.close(fig)  # Close the figure to free resources
+    plt.close(fig)
