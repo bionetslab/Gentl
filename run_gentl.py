@@ -41,8 +41,8 @@ def run_gentl_for_feature(feature_name, feature_df, Np_cap=10, alpha=0.1, max_ge
         g = [0, 1]
 
         # Run the genetic algorithm
-        best_individual, generation = gentl(Np_cap, alpha, goal_labels, g, max_generations, copy=True,
-                                            fitness_threshold=fitness_threshold, p=initial_population)
+        best_individual, generation, mean_distances = gentl(Np_cap, alpha, goal_labels, g, max_generations, copy=True,
+                                            fitness_threshold=fitness_threshold, mu=1, p=initial_population)
 
         # Convert the best individual to a 1D array
         best_individual = np.array(best_individual).flatten()
@@ -55,7 +55,8 @@ def run_gentl_for_feature(feature_name, feature_df, Np_cap=10, alpha=0.1, max_ge
             'patient_id': patient_id,
             'best_individual': best_individual,
             'generation': generation,
-            'best_distance': best_distance
+            'best_distance': best_distance,
+            'mean_distances': mean_distances
         })
 
         # Output optimization results
@@ -80,7 +81,7 @@ def sort_patients_by_generation(results):
     return sorted(results, key=lambda x: x['generation'])
 
 
-def sort_patients_by_distance(results):
+def sort_patients_by_best_distance(results):
     """
     Sort patients by the distance between the best individual and the goal.
 
@@ -91,7 +92,6 @@ def sort_patients_by_distance(results):
     - sorted_results: List of sorted dictionaries by distance to goal
     """
     return sorted(results, key=lambda x: x['best_distance'])
-
 
 def average_generation_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=10, alpha=0.1, max_generations=None, fitness_threshold=0.1):
     """
@@ -107,6 +107,11 @@ def average_generation_results_over_trials(feature_name, feature_df, num_trials=
     - fitness_threshold: Distance threshold for stopping the genetic algorithm
     """
     cumulative_results = {}
+
+    # Determine the total number of healthy regions
+    patient_data_example = list(process_variable_gmm(feature_df, feature_name).values())[0]
+    total_healthy_region_number = len(
+        [key for key in patient_data_example.keys() if key.startswith('healthy_region') and key.endswith(feature_name)])
 
     for trial in range(num_trials):
         print(f"Running trial {trial + 1}/{num_trials} for feature '{feature_name}' with max_generations={max_generations}")
@@ -126,12 +131,12 @@ def average_generation_results_over_trials(feature_name, feature_df, num_trials=
 
     average_results_list = sorted(average_results_list, key=lambda x: x['average_generation'])
     average_results_df = pd.DataFrame(average_results_list)
-    average_results_df.to_csv(f'{feature_name}_average_generation_results.csv', index=False)
+    average_results_df.to_csv(f'{feature_name}_average_generation_results_{total_healthy_region_number}_rois.csv', index=False)
 
-    print(f"Average generation results saved to '{feature_name}_average_generation_results.csv'")
+    print(f"Average generation results saved to '{feature_name}_average_generation_results_{total_healthy_region_number}_rois.csv'")
 
 
-def average_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=10, alpha=0.1, max_generations=None, fitness_threshold=0.1):
+def average_best_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=10, alpha=0.1, max_generations=None, fitness_threshold=0.1):
     """
     Run the genetic algorithm multiple times and save the average distance results to a CSV file.
 
@@ -145,6 +150,11 @@ def average_distance_results_over_trials(feature_name, feature_df, num_trials=20
     - fitness_threshold: Distance threshold for stopping the genetic algorithm
     """
     cumulative_results = {}
+
+    # Determine the total number of healthy regions
+    patient_data_example = list(process_variable_gmm(feature_df, feature_name).values())[0]
+    total_healthy_region_number = len(
+        [key for key in patient_data_example.keys() if key.startswith('healthy_region') and key.endswith(feature_name)])
 
     for trial in range(num_trials):
         print(f"Running trial {trial + 1}/{num_trials} for feature '{feature_name}' with max_generations={max_generations}")
@@ -164,17 +174,74 @@ def average_distance_results_over_trials(feature_name, feature_df, num_trials=20
 
     average_results_list = sorted(average_results_list, key=lambda x: x['average_distance'])
     average_results_df = pd.DataFrame(average_results_list)
-    average_results_df.to_csv(f'{feature_name}_average_distance_results.csv', index=False)
+    average_results_df.to_csv(f'{feature_name}_average_best_distance_results_{total_healthy_region_number}_rois.csv', index=False)
 
-    print(f"Average distance results saved to '{feature_name}_average_distance_results.csv'")
+    print(f"Average distance results saved to '{feature_name}_average_best_distance_results_{total_healthy_region_number}_rois.csv'")
+
+
+def average_mean_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=10, alpha=0.1,
+                                            max_generations=None, fitness_threshold=0.1, specific_generation=None):
+    """
+    Run the genetic algorithm multiple times and save the average distance results at a specific generation to a CSV file.
+
+    Parameters:
+    - feature_name: Name of the feature to process (e.g., 'dissimilarity')
+    - feature_df: DataFrame containing feature data
+    - num_trials: Number of times to run the genetic algorithm
+    - Np_cap: Population size for the genetic algorithm
+    - alpha: Mutation rate for the genetic algorithm
+    - max_generations: Maximum number of iterations for the genetic algorithm
+    - fitness_threshold: Distance threshold for stopping the genetic algorithm
+    - specific_generation: Specific generation number to record the distance value from mean_distances
+    """
+    cumulative_results = {}
+
+    # Determine the total number of healthy regions
+    patient_data_example = list(process_variable_gmm(feature_df, feature_name).values())[0]
+    total_healthy_region_number = len(
+        [key for key in patient_data_example.keys() if key.startswith('healthy_region') and key.endswith(feature_name)])
+
+    for trial in range(num_trials):
+        print(
+            f"Running trial {trial + 1}/{num_trials} for feature '{feature_name}' with max_generations={max_generations}")
+        trial_results = run_gentl_for_feature(feature_name, feature_df, Np_cap, alpha, max_generations,
+                                              fitness_threshold)
+
+        for result in trial_results:
+            patient_id = result['patient_id']
+            mean_distances = result['mean_distances']
+
+            if specific_generation is not None:
+                if specific_generation < len(mean_distances):
+                    selected_distance = mean_distances[specific_generation - 1]
+                else:
+                    selected_distance = mean_distances[-1]
+            else:
+                selected_distance = mean_distances[-1]
+
+            if patient_id not in cumulative_results:
+                cumulative_results[patient_id] = {'selected_distances': []}
+            cumulative_results[patient_id]['selected_distances'].append(selected_distance)
+
+    # Calculate the average results and save to CSV
+    average_results_list = []
+    for patient_id, metrics in cumulative_results.items():
+        avg_distance = np.mean(metrics['selected_distances'])
+        average_results_list.append({'patient_id': patient_id, 'average_distance': avg_distance})
+
+    average_results_list = sorted(average_results_list, key=lambda x: x['average_distance'])
+    average_results_df = pd.DataFrame(average_results_list)
+    average_results_df.to_csv(f'{feature_name}_average_mean_distance_results_{total_healthy_region_number}_rois.csv',
+                              index=False)
+
+    print(f"Average mean_distance results saved to '{feature_name}_average_mean_distance_results_{total_healthy_region_number}_rois.csv'")
 
 
 # Run the test of gentl and GMM integration
 if __name__ == "__main__":
     # Example of running gentl with any feature
-    feature_df = pd.read_csv('../Gentl/scripts/glcm_dissimilarity_features.csv')
+    feature_df = pd.read_csv('../Gentl/scripts/glcm_dissimilarity_features_10_rois.csv')
     feature_name = 'dissimilarity'  # You can change this to 'correlation', 'energy', 'contrast', or 'homogeneity'
-
     # feature_df = pd.read_csv('../Gentl/scripts/glcm_correlation_features.csv')
     # feature_name = 'correlation'
     # feature_df = pd.read_csv('../Gentl/scripts/glcm_energy_features.csv')
@@ -184,23 +251,34 @@ if __name__ == "__main__":
     # feature_df = pd.read_csv('../Gentl/scripts/glcm_homogeneity_features.csv')
     # feature_name = 'homogeneity'
 
-    # Sort and display patients by distance
-    optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, max_generations=8)
-    sorted_by_distance = sort_patients_by_distance(optimization_distance_results)
-    print("\nSorted results by distance between best individual and goal:")
-    for result in sorted_by_distance:
-        print(f"Patient {result['patient_id']}, Distance to goal: {result['best_distance']}")
+    # Sort and display patients by best distance
+    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, max_generations=8)
+    # sorted_by_distance = sort_patients_by_best_distance(optimization_distance_results)
+    # print("\nSorted results by best distance between best individual and goal:")
+    # for result in sorted_by_distance:
+    #     print(f"Patient {result['patient_id']}, Best distance to goal: {result['best_distance']}")
 
-    # Sort and display patients by generation
-    optimization_generation_results = run_gentl_for_feature(feature_name, feature_df, max_generations=50)
-    sorted_by_generation = sort_patients_by_generation(optimization_generation_results)
-    print("\nSorted results by number of iterations:")
-    for result in sorted_by_generation:
-        print(f"Patient {result['patient_id']}, Number of iterations: {result['generation']}")
+    # Sort and display patients by mean distance
+    optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, max_generations=8)
+    sorted_results = sorted(optimization_distance_results, key=lambda x: x['mean_distances'][-1])
+    print("\nSorted results by mean distance between best individual and goal:")
+    for result in sorted_results:
+        mean_distances = result['mean_distances']
+        print(f"Patient {result['patient_id']}, Distance to goal: {mean_distances[-1]}")
+
+    # Sort and display patients by generation:
+    # hint: set different Np_cap values for different number of rois: Np_cap≥rois
+    # 10rois->15np, 20rois->25np, 50rois->55np, 100rois->110np
+    # optimization_generation_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=15, alpha=0.05, max_generations=50, fitness_threshold=0.1)
+    # sorted_by_generation = sort_patients_by_generation(optimization_generation_results)
+    # print("\nSorted results by number of iterations:")
+    # for result in sorted_by_generation:
+    #     print(f"Patient {result['patient_id']}, Number of iterations: {result['generation']}")
 
     # Run multiple trials and save average results to CSV
-    # average_distance_results_over_trials(feature_name, feature_df, max_generations=8)
-    # average_generation_results_over_trials(feature_name, feature_df, max_generations=50)
+    # average_mean_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=15, alpha=0.05,max_generations=50, specific_generation=8)
+    # average_best_distance_results_over_trials(feature_name, feature_df, max_generations=8)
+    # average_generation_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=15, alpha=0.05, max_generations=50, fitness_threshold=0.1)
 
 
 

@@ -3,6 +3,7 @@ import pandas as pd
 # Save results to CSV file
 def save_results_to_csv(results, variable_name):
     results_list = []
+    total_healthy_region_number = 0  # To keep track of total healthy regions per patient
     for patient_id, data in results.items():
         for i in range(20):
             results_list.append({
@@ -12,6 +13,7 @@ def save_results_to_csv(results, variable_name):
                 'label': data[f'cancer_{variable_name}_labels'][i]
             })
         region_keys = [key for key in data.keys() if key.startswith('healthy_region') and key.endswith(f'_{variable_name}')]
+        total_healthy_region_number = len(region_keys)  # Update total healthy regions count
         for region_key in region_keys:
             region_number = region_key.split('_')[1].replace('region', '')
             for i in range(20):
@@ -22,6 +24,6 @@ def save_results_to_csv(results, variable_name):
                     'label': data[f'healthy_region{region_number}_{variable_name}_labels'][i]
                 })
     results_df = pd.DataFrame(results_list)
-    results_df.to_csv(f'{variable_name}_gmm_results.csv', index=False)
+    results_df.to_csv(f'{variable_name}_gmm_results_{total_healthy_region_number}_rois.csv', index=False)
 
 

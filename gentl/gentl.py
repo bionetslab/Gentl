@@ -52,7 +52,9 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
                 population = _ga_step1_initialize_population_randomly_(goal, Np_initial, g)
         else:
             population = p
-    
+
+    mean_distances = []  # List to record the mean distance of each generation
+
     for generation in range(max_generations):
         # Step 2: Evaluate fitness and select parents
         parents = parent_selection_fitness_evaluation(goal, population)
@@ -67,6 +69,15 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
         # Step 5: Replace the old population with the new generation
         population = replace(population, mutated_offspring, goal)
 
+        # Calculate and record the mean distance in current population
+        distances = [euclidean_distance(goal, chromosome) for chromosome in population]
+        mean_distance = np.mean(distances)
+        mean_distances.append(mean_distance)
+
+        # # Print fitness values of all individuals in the population for debugging purposes
+        # fitness_values = [euclidean_distance(goal, chromosome) for chromosome in population]
+        # print(f"Generation {generation + 1} Fitness Values: {fitness_values}")
+
         # Stopping condition: If all individuals are close enough to the goal
         if all(euclidean_distance(goal, chromosome) < fitness_threshold for chromosome in population):
             #print(f"Solution found in generation {generation}")
@@ -77,7 +88,7 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
 
     best_individual = min(population, key=lambda chromosome: euclidean_distance(goal, chromosome))
     if copy:
-        return best_individual, generation
+        return best_individual, generation, mean_distances
     else:
         np.save('population.npy', np.array(population))
 
