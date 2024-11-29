@@ -88,6 +88,17 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
 
 
 def extract_cancer_roi(image, mask):
+    """
+    Extract pixel values for the cancer roi within the bounding box where mask is 1
+
+    Arguments:
+    image (numpy.ndarray): Input image array.
+    mask (numpy.ndarray): Binary mask where 1 indicates cancer regions.
+
+    Returns:
+        cancer_roi: Array of pixel values
+        bbox: (y1,x1,y2,x2) coordinates of the bounding box
+    """
     # Extract pixel values within the bounding box where mask is 1
     bbox = compute_bounding_box(mask)
     r_min, c_min, r_max, c_max = bbox  # (y1,x1,y2,x2)
@@ -163,6 +174,15 @@ class BladderCancerROIVisualizer:
 
 
 def compute_bounding_box(mask):
+    """
+    Compute the bounding box around the cancer roi given a mask.
+
+    Argument:
+    mask (numpy.ndarray): Binary mask where 1 indicates cancer regions
+
+    Returns:
+    coordinates of the bounding box - diagonal coordinates
+    """
     rows = np.any(mask, axis=1)
     cols = np.any(mask, axis=0)
     rmin, rmax = np.where(rows)[0][[0, -1]]
@@ -175,9 +195,11 @@ def compute_neighbors(locations, cancer_roi=False):
     Use KDTree to find the neighbors index and distance to each neighbor,
     no.of.neighbors controlled by param k.
 
-    :arg:
+    Arguments:
     locations (list): Coordinates(y1,x1,y2,x2) of each ROI
-    :return:
+    cancer_roi: Boolean value - True for finding cancer roi neighbors else find neighbors of non cancer roi
+
+    Returns:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
     no_of_neighbors = 4
@@ -212,6 +234,16 @@ def compute_neighbors(locations, cancer_roi=False):
 
 
 def get_coordinates_from_csv(ct_folder, query):
+    """
+    From the csv file return x,y,width,height of rectangular area within each image to extract features
+
+    Arguments:
+    ct_folder: patient_id or filename
+    query: use inner rectangle or outer rectangle for roi selection
+
+    Returns:
+    cod (tuple): x,y,width,height of rectangular area
+    """
     full_data = pd.read_csv("../data/processed_data.csv", index_col=0)
     cod = full_data.loc[ct_folder, query]
     cod = literal_eval(cod)
@@ -220,12 +252,14 @@ def get_coordinates_from_csv(ct_folder, query):
 
 def distance_threshold(locations, cancer_roi=False):
     """
-    Use KDTree to find the neighbors index and distance to each neighbor,
-    no.of.neighbors controlled by param k.
+    Use distance threshold to find the neighbors index and distance to each neighbor,
+    threshold is set using threshold_dist parameter.
 
-    :arg:
+    Arguments:
     locations (list): Coordinates(y1,x1,y2,x2) of each ROI
-    :return:
+    cancer_roi (Boolean value): True for finding cancer roi neighbors else find neighbors of non cancer roi
+
+    Returns:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
     threshold_dist = 300
@@ -300,4 +334,9 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
 
     # Save the plot to a file
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+
+    # Show the plot on screen
+    # plt.show()
+
+    # close the figure
     plt.close(fig)
