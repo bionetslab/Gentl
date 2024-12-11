@@ -336,12 +336,12 @@ def draw_network_graph(graph_name,patient_label):
 base_dataset = BladderCancerDataset(
     root_dir='../data/original/Al-Bladder Cancer'
     )
-roi_per_image =60
+roi_per_image =50
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
-    roi_width=5,
-    roi_height=5,
-    overlap=0,
+    roi_width=8,
+    roi_height=8,
+    overlap=0.40,
     max_rois_per_image=roi_per_image
     )
 
@@ -413,5 +413,6 @@ for patient_label in patient_labels:
 10 - 10,10,0.05
 20 - 10,10,0.25
 30 - 8,8,0.25
-50 - 5,5,0
+50 - 8,8,0.40
+60 - 5,5,0
 """
