@@ -29,8 +29,8 @@ def draw_and_store_bounding_rectangles_within_images():
                 original_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Load in grayscale
 
                 # Step 2: Apply Otsu's thresholding
-                _, mask = cv2.threshold(original_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
+                th, mask = cv2.threshold(original_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                print(file,th)
                 # Step 3: Find contours
                 contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -92,3 +92,5 @@ def draw_and_store_bounding_rectangles_within_images():
 
     processed_data_dataframe = pd.DataFrame(data_list)
     processed_data_dataframe.to_csv("../data/processed_data.csv", index=False)
+
+draw_and_store_bounding_rectangles_within_images()

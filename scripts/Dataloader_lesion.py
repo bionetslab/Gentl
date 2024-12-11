@@ -44,11 +44,10 @@ class BladderCancerDataset(Dataset):
                 for file in os.listdir(case_path):
                     if file.endswith('.dcm'):
                         dcm_file = os.path.join(case_path, file)
-                        # print("Case type", case_type, dcm_file)
-                    elif file.endswith('.png'):
+                    elif file.endswith('.png') and file == "mask.png":
                         mask_file = os.path.join(case_path, file)
-                    elif file.endswith('.jpg'): # image with background pixel as 0
-                        image_with_zero_background = os.path.join(case_path, file)
+                    elif file.endswith('.png') and file == "bladder_mask.png":  # bladder region
+                        bladder_mask = os.path.join(case_path, file)
                     # elif file == 'coords.txt':
                     #     coords_file = os.path.join(case_path, file)
 
@@ -58,7 +57,7 @@ class BladderCancerDataset(Dataset):
                             'dcm': dcm_file,
                             'mask': mask_file,
                             # 'coords': coords_file,
-                            "background_masked_image": image_with_zero_background, # image with background pixel as 0
+                            "background_masked_image": bladder_mask,  # bladder region with pixel 0
                             'time_point': time_point,
                             'ct_folder': ct_folder,
                             'case_type': case_type
@@ -80,6 +79,7 @@ class BladderCancerDataset(Dataset):
         mask = mask / 255.0
 
         background_masked_image = np.array(Image.open(sample['background_masked_image']))
+        background_masked_image = background_masked_image / 255.0
         # with open(sample['coords'], 'r') as f:
         #     coords = f.read().strip()
 
@@ -116,7 +116,7 @@ class BladderCancerROIDataset(Dataset):
     def _extract_all_rois(self):
         roi_samples = []
         cancer_samples = []
-        neighbour_parm = "dist_threshold" # or dist_threshold or knn
+        neighbour_parm = "dist_threshold"  # or dist_threshold or knn
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -125,7 +125,7 @@ class BladderCancerROIDataset(Dataset):
             ct_folder = sample['ct_folder']
 
             rois, cancer_roi, cancer_coordinates, cancer_neighbors = extract_non_cancer_rois(
-                neighbour_parm,ct_folder, image, mask,background_masked_image, self.roi_width, self.roi_height,
+                neighbour_parm, ct_folder, image, mask, background_masked_image, self.roi_width, self.roi_height,
                 self.overlap, self.max_rois_per_image
                 )
 
@@ -291,20 +291,60 @@ def visualize_dataset(dataset, num_samples=4):
     plt.show()
 
 
+def draw_network_graph(graph_name,patient_label):
+    """
+    To draw network graph
+
+    Arguments: graph_name - corresponding to each patient
+    patient_label - corresponding to each patient
+    """
+    plt.figure(figsize=(10, 8))  # Adjust the figure size
+    pos = nx.shell_layout(graph_name)  # Apply layout
+
+    # Extract node attributes
+    case_types = nx.get_node_attributes(graph_name, "case_type")
+
+    # Map case types to colors
+    color_map = {
+        "Lesion": "red",  # Lesion nodes in red
+        "Control": "green"  # Non-lesion nodes in green
+    }
+
+    node_colors = [color_map.get(case_types[node]) for node in graph_name.nodes]
+
+    # Draw nodes, edges, and labels
+    nx.draw_networkx_nodes(graph_name, pos, node_color=node_colors, node_size=1000)
+    nx.draw_networkx_edges(graph_name, pos, edge_color='gray')
+
+    # Add index as node values
+    nx.draw_networkx_labels(graph_name, pos, font_size=12, font_color='black')
+
+    # Extract edge labels and format them to two decimal places
+    edge_labels = nx.get_edge_attributes(graph_name, "spatial_distance")
+    formatted_edge_labels = {edge: f"{dist:.2f}" for edge, dist in edge_labels.items()}  # Format to 2 decimals
+
+    # Draw edge labels with formatted values
+    nx.draw_networkx_edge_labels(graph_name, pos, edge_labels=formatted_edge_labels, font_color='red')
+
+    # Display the graph
+    patient_id = patient_label.split(sep="-")[1]
+    plt.title(f"Spatial Network patient#: {patient_id}")
+    plt.axis('off')
+    plt.show()
+
+
 base_dataset = BladderCancerDataset(
     root_dir='../data/original/Al-Bladder Cancer'
     )
-roi_per_image = 10
+roi_per_image =60
 roi_dataset = BladderCancerROIDataset(
     base_dataset,
-    roi_width=15,
-    roi_height=15,
-    overlap=0.25,
+    roi_width=5,
+    roi_height=5,
+    overlap=0,
     max_rois_per_image=roi_per_image
     )
-# print(len(roi_dataset))
-# for r in roi_dataset:
-#     print(r)
+
 cancer_roi_dataset = roi_dataset.get_cancer_samples()
 full_roi_dataset = roi_dataset + cancer_roi_dataset
 
@@ -320,9 +360,12 @@ for patient_label in patient_labels:
     new_patient_labels.append(patient_label.replace("-", "_"))  # change CT-009 to CT_009
 patientIndex_newPatientIndex_dict = dict(zip(patient_labels, new_patient_labels))  # {CT-009:CT_009,CT-010:CT_010..}
 
+patient_graphs = {}
+
 for patient_label in patient_labels:
     graph_name = f"spatial_knn_network_{patientIndex_newPatientIndex_dict[patient_label]}"
-    exec(graph_name + "= nx.Graph()")  # creates n empty graphs, n-no of patients
+    #exec(graph_name + "= nx.Graph()")  # creates n empty graphs, n-no of patients
+    patient_graphs[graph_name] = nx.Graph()
 
     patient_wise_rois = []
     for r in full_roi_dataset:  # takes the first non cancer roi
@@ -334,9 +377,10 @@ for patient_label in patient_labels:
     index_ = -1
     for roi in patient_wise_rois:  # takes the first non-cancer roi for 1 patient
         index_ += 1  # add index as the node and rest as node attributes
-        exec(
-            graph_name + ".add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])"
-            )
+        # exec(
+        #     graph_name + ".add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])"
+        #     )
+        patient_graphs[graph_name].add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])
 
         list_of_edges = []
         list_of_neighs = []
@@ -360,4 +404,14 @@ for patient_label in patient_labels:
             dict_of_edge_attributes[edge] = dist
             list_of_edge_attributes.append(dist)
 
-            exec(graph_name + ".add_edge(edge[0],edge[1], spatial_distance=dist)")
+            #exec(graph_name + ".add_edge(edge[0],edge[1], spatial_distance=dist)")
+            patient_graphs[graph_name].add_edge(edge[0],edge[1], spatial_distance=dist)
+
+    #draw_network_graph(patient_graphs[graph_name],patient_label)
+
+"""
+10 - 10,10,0.05
+20 - 10,10,0.25
+30 - 8,8,0.25
+50 - 5,5,0
+"""

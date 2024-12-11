@@ -26,8 +26,10 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     Returns:
     list: List of extracted ROI arrays.
     """
-    query = "outer_rect_coordinates" if max_rois >= 500 else "inner_rect_coordinates" # decides which rectangular region to select for roi selection
+    query = "bladder_region" # choose the bladder region
     x_, y_, w_, h_ = get_coordinates_from_csv(ct_folder, query)
+    w_ = w_ + x_
+    h_ = h_ + y_
     # h, w = image.shape  # (512,512)
     stride_y = int(roi_height * (1 - overlap))
     stride_x = int(roi_width * (1 - overlap))
@@ -41,7 +43,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
             background_masked_image = out_boundary[y:y + roi_height, x:x + roi_width]
 
             # Check if the ROI is completely non-cancer
-            if np.sum(roi_mask) == 0 and np.count_nonzero(background_masked_image) / background_masked_image.size >= 0.80:
+            if np.sum(roi_mask) == 0 and np.sum(background_masked_image) == 0:
                 coordinates = (y, x, y + roi_height, x + roi_width)  # (y1,x1,y2,x2)
                 locations.append((y, x, y + roi_height, x + roi_width))  # store all the coordinates of rois per image
                 rois.append((roi, coordinates))  # tuple with roi and coordinates
@@ -66,7 +68,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
                 c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(
                     locations, True
                     )
-                #visualize_non_cancerous_region(image, locations[:-1], ct_folder)
+                # visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
                 return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
     if max_rois > 1:
         neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
@@ -83,7 +85,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     c_roi, c_coordinates = extract_cancer_roi(image, mask)
     locations.append(c_coordinates)
     c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations, True)
-    #visualize_non_cancerous_region(image, locations[:-1], ct_folder)
+    # visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
     return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
 
 
@@ -202,7 +204,7 @@ def compute_neighbors(locations, cancer_roi=False):
     Returns:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
-    no_of_neighbors = 4
+    no_of_neighbors = 3
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
 
@@ -247,6 +249,7 @@ def get_coordinates_from_csv(ct_folder, query):
     full_data = pd.read_csv("../data/processed_data.csv", index_col=0)
     cod = full_data.loc[ct_folder, query]
     cod = literal_eval(cod)
+    print(cod)
     return cod
 
 
@@ -262,7 +265,7 @@ def distance_threshold(locations, cancer_roi=False):
     Returns:
     dictionary of neighbors with index, distance to and coordinates of each neighbor
     """
-    threshold_dist = 300
+    threshold_dist = 10
     roi_coordinates = [(x, y) for (y, x, _, _) in locations]
     kdt_tree = KDTree(roi_coordinates, leaf_size=30)  # metric='euclidean'
 
@@ -305,10 +308,10 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     - bbox: List of bounding boxes, where each box is a tuple (rmin, cmin, rmax, cmax).
     - ct_folder: Folder containing CT scans (for logging or processing purposes).
     """
-    # print(ct_folder)
-    # print(len(set(bbox)))
+    print(ct_folder)
+    print(len(set(bbox)))
 
-    output_folder = "../data/with_500_outer_with_20_bounding_boxes"
+    output_folder = "../data/with_60_bounding_boxes_within_bladder_region/"
     filename = f"{ct_folder}.jpg"
     output_path = os.path.join(output_folder, filename)
 
