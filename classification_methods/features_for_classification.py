@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-max_no_of_rois = 10  # can be set to 10,20,30,50,60
-selected_feature = "contrast"
+max_no_of_rois = 20  # can be set to 10,20,30,50,60
+selected_feature = "dissimilarity"
 features_per_roi = 20  # 20 dissimilarity features per roi
 random_selection = False
 feature_df = pd.read_csv(f'../glcm_extracted_features_results/glcm_{selected_feature}_features_{max_no_of_rois}_rois.csv')
@@ -41,7 +41,7 @@ for patient_id in patient_ids:
     healthy_features = healthy_data[selected_feature].values
 
     # Randomly select a healthy roi from max roi number or set a number eg 5
-    random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 6
+    random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 5
     start_index = random_feature_set_index * features_per_roi
     end_index = start_index + features_per_roi
 
