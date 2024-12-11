@@ -26,7 +26,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     Returns:
     list: List of extracted ROI arrays.
     """
-    query = "bladder_region" # choose the bladder region
+    query = "bladder_region"  # choose the bladder region
     x_, y_, w_, h_ = get_coordinates_from_csv(ct_folder, query)
     w_ = w_ + x_
     h_ = h_ + y_
@@ -68,7 +68,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
                 c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(
                     locations, True
                     )
-                # visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
+                #visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
                 return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
     if max_rois > 1:
         neighbors = compute_neighbors(locations) if neighbor_parm == "knn" else distance_threshold(locations)
@@ -85,7 +85,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     c_roi, c_coordinates = extract_cancer_roi(image, mask)
     locations.append(c_coordinates)
     c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations, True)
-    # visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
+    #visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
     return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
 
 
@@ -249,7 +249,6 @@ def get_coordinates_from_csv(ct_folder, query):
     full_data = pd.read_csv("../data/processed_data.csv", index_col=0)
     cod = full_data.loc[ct_folder, query]
     cod = literal_eval(cod)
-    print(cod)
     return cod
 
 
@@ -309,9 +308,9 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     - ct_folder: Folder containing CT scans (for logging or processing purposes).
     """
     print(ct_folder)
-    print(len(set(bbox)))
+    print(f"Bbox length {len(set(bbox))}")
 
-    output_folder = "../data/with_60_bounding_boxes_within_bladder_region/"
+    output_folder = "../data/with_50_bounding_boxes_within_bladder_region/"
     filename = f"{ct_folder}.jpg"
     output_path = os.path.join(output_folder, filename)
 
@@ -329,8 +328,8 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
             plt.Rectangle(
                 (cmin, rmin), cmax - cmin, rmax - rmin,
                 fill=False, edgecolor='red', linewidth=1
+                )
             )
-        )
 
     # Remove axis labels, ticks, and spines
     ax.axis('off')

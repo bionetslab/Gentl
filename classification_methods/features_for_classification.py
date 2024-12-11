@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 
-max_no_of_rois = 10  # can be set to 10,20,50,100,500,1000
-selected_feature = "dissimilarity"
+max_no_of_rois = 10  # can be set to 10,20,30,50,60
+selected_feature = "contrast"
 features_per_roi = 20  # 20 dissimilarity features per roi
-
-feature_df = pd.read_csv(f'../scripts/glcm_{selected_feature}_features_{max_no_of_rois}_rois.csv')
+random_selection = False
+feature_df = pd.read_csv(f'../glcm_extracted_features_results/glcm_{selected_feature}_features_{max_no_of_rois}_rois.csv')
 
 # Get a list of unique patient IDs
 patient_ids = feature_df['patient_id'].unique()
@@ -40,11 +40,12 @@ for patient_id in patient_ids:
     healthy_data = patient_data[patient_data['roi_condition'] == 'healthy']
     healthy_features = healthy_data[selected_feature].values
 
-    # Randomly select a healthy roi from max roi number
-    random_feature_set_index = np.random.randint(0, max_no_of_rois)
+    # Randomly select a healthy roi from max roi number or set a number eg 5
+    random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 6
     start_index = random_feature_set_index * features_per_roi
     end_index = start_index + features_per_roi
-    # Extract the randomly selected subsequent 20 values
+
+    # Extract the subsequent 20 features from the selected roi
     selected_healthy_features = healthy_features[start_index:end_index]
 
     # Dynamically generate column names for the features
@@ -64,6 +65,12 @@ for patient_id in patient_ids:
 
 
 def get_features_by_type():
+    """
+    Merge cancer features to include label for NMIBC(0) and MIBC(1)
+
+    Returns:
+    Dataframe_cancer_with_types: A dataframe with patient IDs, cancer features, and binary cancer type labels (0 for NMIBC, 1 for MIBC).
+    """
     # -------------------NMIBC Vs MIBC----------------------
     csv_path = '../data/original/Al-Bladder Cancer/Data_CT only with anonymized ID 11-13-24_clean.csv'  # csv with cancer types
     df_cancer_types = pd.read_csv(csv_path)
@@ -82,11 +89,17 @@ def get_features_by_type():
     Dataframe_cancer_with_types["cancer_type_label"] = Dataframe_cancer_with_types["cancer_type"].map(
         {"Ta": 0, "Tis": 0, "T1": 0, "T2": 1, "T3": 1, "T4": 1}
         ).astype(int)
-    # Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_types.csv")
+    #Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_types.csv")
     return Dataframe_cancer_with_types
 
 
 def get_features_by_sub_type():
+    """
+    Merge cancer features to include label for different stages
+
+    Returns:
+    Dataframe_cancer_with_types: A dataframe with patient IDs, cancer features, and label for cancer stage.
+    """
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
     csv_path = '../data/original/Al-Bladder Cancer/Data_CT only with anonymized ID 11-13-24_clean.csv'  # csv with cancer types
     df_cancer_types = pd.read_csv(csv_path)
@@ -104,14 +117,20 @@ def get_features_by_sub_type():
     Dataframe_cancer_with_types["cancer_sub_type_label"] = Dataframe_cancer_with_types["cancer_type"].map(
         {"T0": 0, "Ta": 1, "Tis": 2, "T1": 3, "T2": 4, "T3": 5, "T4": 6}
         ).astype(int)
-    # Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_types.csv")
+    # Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_sub_types.csv")
     return Dataframe_cancer_with_types
 
 
 def get_all_features():
+    """
+    Merge cancer features and healthy features
+
+    Returns:
+    Dataframe_cancer_with_types: A dataframe with patient IDs, cancer and healthy features with labels
+    """
     # -------------------Cancer Vs Non-cancer-----------------------------------------
     full_features_dataframe = pd.concat([cancer_features_df, healthy_features_df], axis=0)
     full_features_dataframe = full_features_dataframe.set_index("patient_id")
-    # full_features_dataframe.to_csv("glcm_all_features_svm.csv")
+    # full_features_dataframe.to_csv("glcm_all_features.csv")
     return full_features_dataframe
 
