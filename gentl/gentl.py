@@ -1,11 +1,12 @@
 import numpy as np
 from gentl._ga_step1_initialize_population_ import _ga_step1_initialize_population_randomly_
-from gentl._ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance, parent_selection_fitness_evaluation
+from gentl._ga_step2_parent_selection_by_fitness_evaluation_ import euclidean_distance, absolute_distance, parent_selection_fitness_evaluation
 from gentl._ga_step3_crossover import crossover
 from gentl._ga_step4_mutation import mutate
 from gentl._ga_step5_replacement import replace
 
-def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=1.0, mu=None, Np_initial=None, p=[]):
+
+def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_threshold=0.1, mu=None, Np_initial=None, p=[], distance_mode='euclidean'):
     """Saves i) list of lists as 2D np.array (np.array(list_of_lists)), ii) scores
     OR
     returns i) list of lists, ii) scores.
@@ -53,11 +54,19 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
         else:
             population = p
 
+    # Select the appropriate distance function
+    if distance_mode == 'euclidean':
+        distance_func = euclidean_distance
+    elif distance_mode == 'absolute':
+        distance_func = absolute_distance
+    else:
+         raise ValueError("Invalid distance mode. Choose 'euclidean' or 'absolute'.")
+
     mean_distances = []  # List to record the mean distance of each generation
 
     for generation in range(max_generations):
         # Step 2: Evaluate fitness and select parents
-        parents = parent_selection_fitness_evaluation(goal, population)
+        parents = parent_selection_fitness_evaluation(goal, population, distance_mode)
 
         # Step 3: Crossover to create offspring
         offspring_size = int(Np_cap - len(parents))
@@ -69,24 +78,24 @@ def gentl(Np_cap, alpha, goal, g, max_generations=1000, copy=True, fitness_thres
         # Step 5: Replace the old population with the new generation
         population = replace(population, mutated_offspring, goal)
 
-        # Calculate and record the mean distance in current population
-        distances = [euclidean_distance(goal, chromosome) for chromosome in population]
+        # Calculate and record the mean euclidean_distance in current population
+        distances = [distance_func(goal, chromosome) for chromosome in population]
         mean_distance = np.mean(distances)
         mean_distances.append(mean_distance)
 
         # # Print fitness values of all individuals in the population for debugging purposes
-        # fitness_values = [euclidean_distance(goal, chromosome) for chromosome in population]
-        # print(f"Generation {generation + 1} Fitness Values: {fitness_values}")
+        fitness_values = [distance_func(goal, chromosome) for chromosome in population]
+        print(f"Generation {generation + 1} Fitness Values: {fitness_values}")
 
         # Stopping condition: If all individuals are close enough to the goal
-        if all(euclidean_distance(goal, chromosome) < fitness_threshold for chromosome in population):
+        if all(distance_func(goal, chromosome) < fitness_threshold for chromosome in population):
             #print(f"Solution found in generation {generation}")
             break
 
     else:
         print(f"Maximum generation limit reached ({max_generations}). Stopping without finding an exact solution.")
 
-    best_individual = min(population, key=lambda chromosome: euclidean_distance(goal, chromosome))
+    best_individual = min(population, key=lambda chromosome: distance_func(goal, chromosome))
     if copy:
         return best_individual, generation, mean_distances
     else:
@@ -104,19 +113,20 @@ def test_genetic_algorithm():
     Np_cap = 10           # Population size
     alpha = 0.05          # Mutation rate (5%)
     max_generations = 100  # Maximum number of generations
-    fitness_threshold = 0.5  # Maximum allowable distance from goal
+    # fitness_threshold = 0.5  # Maximum allowable distance from goal
 
     # Run the genetic algorithm
-    population = gentl(Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=fitness_threshold)
+    population, _, mean_distance = gentl(Np_cap, alpha, goal, g, max_generations, copy=True, fitness_threshold=0.1, distance_mode='absolute')
     # Check if the population is empty
     if not population:
         print("Test failed: Population is empty.")
         return
     # Print the result
-    best_chromosome = population[0]
-    best_distance = euclidean_distance(goal, best_chromosome)
+    best_chromosome = population
+    best_distance = absolute_distance(goal, best_chromosome)
     print(f"Best chromosome: {best_chromosome}")
     print(f"Distance to goal: {best_distance}")
+    print(f"mean_distance': {mean_distance}")
 
 # Run the test
 if __name__ == "__main__":

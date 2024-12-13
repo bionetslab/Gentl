@@ -26,7 +26,11 @@ def euclidean_distance(goal, chromosome): # L2-norm distance
     dist = distance.euclidean(goal, chromosome)
     return dist
 
-def parent_selection_fitness_evaluation(goal, population):
+def absolute_distance(goal, chromosome):
+    dist = sum(abs(g - c) for g, c in zip(goal, chromosome))
+    return dist
+
+def parent_selection_fitness_evaluation(goal, population,  distance_mode='euclidean'):
     """
         Evaluate the fitness of each chromosome.
         Select the top 50% as parents based on fitness (Euclidean distance).
@@ -48,7 +52,12 @@ def parent_selection_fitness_evaluation(goal, population):
     # eg: distances = [(chromosome1, 0.1), (chromosome2, 0.2), (chromosome3, 0.3)]
     distances = []
     for chromosome in population:
-        dist = euclidean_distance(goal_array, np.array(chromosome))
+        if distance_mode == 'euclidean':
+            dist = euclidean_distance(goal_array, np.array(chromosome))
+        elif distance_mode == 'absolute':
+            dist = absolute_distance(goal_array, np.array(chromosome))
+        else:
+            raise ValueError("Invalid distance mode. Choose 'euclidean' or 'absolute'.")
         distances.append((chromosome, dist))
     distances.sort(key=lambda x: x[1])
     selected_count = len(population) // 2
