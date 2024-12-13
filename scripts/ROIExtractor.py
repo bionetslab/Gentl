@@ -353,7 +353,9 @@ def compute_delaunay_triangulation(locations, cancer_roi=False):
     # Pass the coordinates to Delaunay
     tri = Delaunay(roi_coordinates)
 
+    neighbors_dict = {}
+
     # Visualize the Delaunay triangulation - tri.simplicies return the indices of the vertex of the trainable
     plt.triplot([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], tri.simplices)
-    plt.scatter([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], color='red')
+    plt.scatter([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], color='green')
     plt.show()
