@@ -18,7 +18,6 @@ from classification_methods.methods.random_forest import classify_cancer_invasio
     classify_cancer_vs_non_cancerous as random_forest_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as random_forest_classify_cancer_stage
 
-
 def perform_classification():
     """
     Performs classification using the classifiers in the list
@@ -29,8 +28,8 @@ def perform_classification():
     """
 
     # List of classifiers to use
-    classifier_list = ["logistic_regression", "svm_classifier", "knn_classifier","lda_classifier",
-                       "decision_tree", "random_forest" ]
+    classifier_list = ["logistic_regression", "svm_classifier", "knn_classifier",
+                       "decision_tree", "random_forest","lda_classifier", ]
 
     # Mapping classifier methods to task-specific functions
     classifier_methods = {

@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-max_no_of_rois = 20  # can be set to 10,20,30,50,60
-selected_feature = "dissimilarity"
+max_no_of_rois = 50  # can be set to 10,20,30,50,60
+selected_feature = "correlation" #[dissimilarity,correlation,energy,contrast,homogeneity]
 features_per_roi = 20  # 20 dissimilarity features per roi
 random_selection = False
 feature_df = pd.read_csv(f'../glcm_extracted_features_results/glcm_{selected_feature}_features_{max_no_of_rois}_rois.csv')
@@ -41,7 +41,7 @@ for patient_id in patient_ids:
     healthy_features = healthy_data[selected_feature].values
 
     # Randomly select a healthy roi from max roi number or set a number eg 5
-    random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 5
+    random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 10
     start_index = random_feature_set_index * features_per_roi
     end_index = start_index + features_per_roi
 
@@ -89,7 +89,7 @@ def get_features_by_type():
     Dataframe_cancer_with_types["cancer_type_label"] = Dataframe_cancer_with_types["cancer_type"].map(
         {"Ta": 0, "Tis": 0, "T1": 0, "T2": 1, "T3": 1, "T4": 1}
         ).astype(int)
-    #Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_types.csv")
+    Dataframe_cancer_with_types.to_csv(f"./features/glcm_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_types.csv")
     return Dataframe_cancer_with_types
 
 
@@ -117,7 +117,7 @@ def get_features_by_sub_type():
     Dataframe_cancer_with_types["cancer_sub_type_label"] = Dataframe_cancer_with_types["cancer_type"].map(
         {"T0": 0, "Ta": 1, "Tis": 2, "T1": 3, "T2": 4, "T3": 5, "T4": 6}
         ).astype(int)
-    # Dataframe_cancer_with_types.to_csv("glcm_cancer_features_with_sub_types.csv")
+    Dataframe_cancer_with_types.to_csv(f"./features/glcm_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_sub_types.csv")
     return Dataframe_cancer_with_types
 
 
@@ -130,7 +130,18 @@ def get_all_features():
     """
     # -------------------Cancer Vs Non-cancer-----------------------------------------
     full_features_dataframe = pd.concat([cancer_features_df, healthy_features_df], axis=0)
-    full_features_dataframe = full_features_dataframe.set_index("patient_id")
-    # full_features_dataframe.to_csv("glcm_all_features.csv")
-    return full_features_dataframe
 
+    csv_path = '../data/original/Al-Bladder Cancer/Data_CT only with anonymized ID 11-13-24_clean.csv'  # csv with cancer types
+    df_cancer_types = pd.read_csv(csv_path)
+
+    full_features_dataframe = pd.merge(
+        full_features_dataframe, df_cancer_types[["Final Path", "Anonymized ID"]], left_on='patient_id',
+        right_on="Anonymized ID", how='left'
+        )
+    full_features_dataframe = full_features_dataframe.rename(
+        columns={"Final Path": "cancer_type"}
+        )
+    full_features_dataframe = full_features_dataframe.drop("Anonymized ID", axis=1)
+    full_features_dataframe = full_features_dataframe.set_index("patient_id")
+    full_features_dataframe.to_csv(f"./features/glcm_all_{selected_feature}_features_{max_no_of_rois}_rois.csv")
+    return full_features_dataframe

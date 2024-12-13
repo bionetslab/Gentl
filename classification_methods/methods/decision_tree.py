@@ -47,7 +47,7 @@ def classify_cancer_invasion():
 def classify_cancer_vs_non_cancerous():
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
     full_features_dataframe = get_all_features()
-    X = full_features_dataframe.drop(columns=["label"])  # no need to drop index
+    X = full_features_dataframe.drop(columns=["label","cancer_type"])  # no need to drop index
     y = full_features_dataframe["label"]
 
     # Train-test split

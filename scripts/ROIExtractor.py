@@ -4,6 +4,7 @@ from ast import literal_eval
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial import Delaunay
 from sklearn.neighbors import KDTree
 
 
@@ -68,6 +69,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
                 c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(
                     locations, True
                     )
+                # compute_delaunay_triangulation(locations)
                 #visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
                 return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
     if max_rois > 1:
@@ -86,6 +88,7 @@ def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary,
     locations.append(c_coordinates)
     c_neighbors = compute_neighbors(locations, True) if neighbor_parm == "knn" else distance_threshold(locations, True)
     #visualize_and_store_non_cancerous_region(image, locations[:-1], ct_folder)
+    # compute_delaunay_triangulation(locations)
     return rois, c_roi, c_coordinates, c_neighbors[len(locations) - 1]
 
 
@@ -342,3 +345,15 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
 
     # close the figure
     plt.close(fig)
+
+
+def compute_delaunay_triangulation(locations, cancer_roi=False):
+    roi_coordinates = [(x, y) for (y, x, _, _) in locations]
+
+    # Pass the coordinates to Delaunay
+    tri = Delaunay(roi_coordinates)
+
+    # Visualize the Delaunay triangulation - tri.simplicies return the indices of the vertex of the trainable
+    plt.triplot([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], tri.simplices)
+    plt.scatter([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], color='red')
+    plt.show()
