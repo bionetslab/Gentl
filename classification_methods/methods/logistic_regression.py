@@ -276,12 +276,11 @@ def hyperparameter_tuning(task, X_train, y_train, X_test, y_test):
     stratified_k_fold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     # GridSearchCV with StratifiedKFold
-    # grid = GridSearchCV(
-    #     LogisticRegression(class_weight="balanced"), param_grid, refit=True, cv=stratified_k_fold, verbose=3
-    #     )
     grid = GridSearchCV(
-        LogisticRegression(class_weight="balanced", multi_class="ovr"), param_grid, refit=True, cv=stratified_k_fold, verbose=3
+        LogisticRegression(class_weight="balanced"), param_grid, refit=True, cv=stratified_k_fold, verbose=3
         )
+    # grid = GridSearchCV( LogisticRegression(class_weight="balanced", multi_class="ovr"), param_grid, refit=True,
+    # cv=stratified_k_fold, verbose=3 )
 
     # Fitting the model for grid search
     grid.fit(X_train, y_train)
