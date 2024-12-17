@@ -116,7 +116,7 @@ class BladderCancerROIDataset(Dataset):
     def _extract_all_rois(self):
         roi_samples = []
         cancer_samples = []
-        neighbour_parm = "dist_threshold"  # or dist_threshold or knn
+        neighbour_parm = "knn"  # or dist_threshold or knn
         for idx in range(len(self.base_dataset)):
             sample = self.base_dataset[idx]  # calling getitem() from BladderCancerDataset class
             image = sample['image'].squeeze().numpy()
@@ -333,86 +333,87 @@ def draw_network_graph(graph_name,patient_label):
     plt.show()
 
 
-base_dataset = BladderCancerDataset(
-    root_dir='../data/original/Al-Bladder Cancer'
-    )
-roi_per_image =50
-roi_dataset = BladderCancerROIDataset(
-    base_dataset,
-    roi_width=8,
-    roi_height=8,
-    overlap=0.40,
-    max_rois_per_image=roi_per_image
-    )
-
-cancer_roi_dataset = roi_dataset.get_cancer_samples()
-full_roi_dataset = roi_dataset + cancer_roi_dataset
-
-# {(0, 1): 96.0, (0, 5): 96.0, (0, 6): 135.7645019878171, (1, 6): 96.0, (1, 2): 96.0, (1, 5): 135.7645019878171, (5, 6): 96.0, (6, 7): 96.0, (6, 10): 242.9588442514493, (2, 3): 96.0, (2, 7): 96.0, (3, 8): 96.0, (3, 4): 96.0, (3, 9): 135.7645019878171, (7, 8): 96.0, (7, 10): 205.73040611440985, (8, 4): 135.7645019878171, (8, 9): 96.0, (8, 10): 209.88806540630173, (4, 9): 96.0}
-
-
-patient_labels = []
-for r in full_roi_dataset:
-    patient_labels.append(r["ct_folder"])
-patient_labels = list(set(patient_labels))  # list of patient id's
-new_patient_labels = []
-for patient_label in patient_labels:
-    new_patient_labels.append(patient_label.replace("-", "_"))  # change CT-009 to CT_009
-patientIndex_newPatientIndex_dict = dict(zip(patient_labels, new_patient_labels))  # {CT-009:CT_009,CT-010:CT_010..}
-
-patient_graphs = {}
-
-for patient_label in patient_labels:
-    graph_name = f"spatial_knn_network_{patientIndex_newPatientIndex_dict[patient_label]}"
-    #exec(graph_name + "= nx.Graph()")  # creates n empty graphs, n-no of patients
-    patient_graphs[graph_name] = nx.Graph()
-
-    patient_wise_rois = []
-    for r in full_roi_dataset:  # takes the first non cancer roi
-        if patientIndex_newPatientIndex_dict[r["ct_folder"]] == patientIndex_newPatientIndex_dict[patient_label]:
-            patient_wise_rois.append(r)  # collect the roi's corresponding to 1 patient - list of dict
-
-    edge_list = []
-
-    index_ = -1
-    for roi in patient_wise_rois:  # takes the first non-cancer roi for 1 patient
-        index_ += 1  # add index as the node and rest as node attributes
-        # exec(
-        #     graph_name + ".add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])"
-        #     )
-        patient_graphs[graph_name].add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])
-
-        list_of_edges = []
-        list_of_neighs = []
-        for neighs in roi['neighbors']:  # picks each neighbor(dict) from the list
-            list_of_neighs.append(list(neighs.keys())[0])  # store the index of the neighbor
-            edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]]))  # (0,3)
-            list_of_edges.append(edge_tuple)
-        list_of_edges = list(set(list_of_edges))  # [(0,1),(0,4)]
-
-        dict_of_edge_attributes = {}
-        list_of_edge_attributes = []
-        for edge in list_of_edges:
-            if edge[0] == index_:  # For later use to extract distance
-                n = edge[1]
-            else:
-                n = edge[0]
-
-            for neighs2 in roi["neighbors"]:  # picks each neighbor(dict) from the list
-                if list(neighs2.keys())[0] == n:  # pick up the index of the neighbors
-                    dist = neighs2[n]["distance"]
-            dict_of_edge_attributes[edge] = dist
-            list_of_edge_attributes.append(dist)
-
-            #exec(graph_name + ".add_edge(edge[0],edge[1], spatial_distance=dist)")
-            patient_graphs[graph_name].add_edge(edge[0],edge[1], spatial_distance=dist)
-
-    #draw_network_graph(patient_graphs[graph_name],patient_label)
-
-"""
-10 - 10,10,0.05
-20 - 10,10,0.25
-30 - 8,8,0.25
-50 - 8,8,0.40
-60 - 5,5,0
-"""
+# base_dataset = BladderCancerDataset(
+#     root_dir='../data/original/Al-Bladder Cancer'
+#     )
+# roi_per_image =40
+# roi_dataset = BladderCancerROIDataset(
+#     base_dataset,
+#     roi_width=8,
+#     roi_height=8,
+#     overlap=0.30,
+#     max_rois_per_image=roi_per_image
+#     )
+#
+# cancer_roi_dataset = roi_dataset.get_cancer_samples()
+# full_roi_dataset = roi_dataset + cancer_roi_dataset
+#
+# # {(0, 1): 96.0, (0, 5): 96.0, (0, 6): 135.7645019878171, (1, 6): 96.0, (1, 2): 96.0, (1, 5): 135.7645019878171, (5, 6): 96.0, (6, 7): 96.0, (6, 10): 242.9588442514493, (2, 3): 96.0, (2, 7): 96.0, (3, 8): 96.0, (3, 4): 96.0, (3, 9): 135.7645019878171, (7, 8): 96.0, (7, 10): 205.73040611440985, (8, 4): 135.7645019878171, (8, 9): 96.0, (8, 10): 209.88806540630173, (4, 9): 96.0}
+#
+#
+# patient_labels = []
+# for r in full_roi_dataset:
+#     patient_labels.append(r["ct_folder"])
+# patient_labels = list(set(patient_labels))  # list of patient id's
+# new_patient_labels = []
+# for patient_label in patient_labels:
+#     new_patient_labels.append(patient_label.replace("-", "_"))  # change CT-009 to CT_009
+# patientIndex_newPatientIndex_dict = dict(zip(patient_labels, new_patient_labels))  # {CT-009:CT_009,CT-010:CT_010..}
+#
+# patient_graphs = {}
+#
+# for patient_label in patient_labels:
+#     graph_name = f"spatial_knn_network_{patientIndex_newPatientIndex_dict[patient_label]}"
+#     #exec(graph_name + "= nx.Graph()")  # creates n empty graphs, n-no of patients
+#     patient_graphs[graph_name] = nx.Graph()
+#
+#     patient_wise_rois = []
+#     for r in full_roi_dataset:  # takes the first non cancer roi
+#         if patientIndex_newPatientIndex_dict[r["ct_folder"]] == patientIndex_newPatientIndex_dict[patient_label]:
+#             patient_wise_rois.append(r)  # collect the roi's corresponding to 1 patient - list of dict
+#
+#     edge_list = []
+#
+#     index_ = -1
+#     for roi in patient_wise_rois:  # takes the first non-cancer roi for 1 patient
+#         index_ += 1  # add index as the node and rest as node attributes
+#         # exec(
+#         #     graph_name + ".add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])"
+#         #     )
+#         patient_graphs[graph_name].add_node(index_, r_index=roi['index'], image=roi['image'], coordinates=roi['coordinates'], neighbors=roi['neighbors'], time_point=roi['time_point'], ct_folder=roi['ct_folder'], case_type=roi['case_type'])
+#
+#         list_of_edges = []
+#         list_of_neighs = []
+#         for neighs in roi['neighbors']:  # picks each neighbor(dict) from the list
+#             list_of_neighs.append(list(neighs.keys())[0])  # store the index of the neighbor
+#             edge_tuple = tuple(sorted([index_, list(neighs.keys())[0]]))  # (0,3)
+#             list_of_edges.append(edge_tuple)
+#         list_of_edges = list(set(list_of_edges))  # [(0,1),(0,4)]
+#
+#         dict_of_edge_attributes = {}
+#         list_of_edge_attributes = []
+#         for edge in list_of_edges:
+#             if edge[0] == index_:  # For later use to extract distance
+#                 n = edge[1]
+#             else:
+#                 n = edge[0]
+#
+#             for neighs2 in roi["neighbors"]:  # picks each neighbor(dict) from the list
+#                 if list(neighs2.keys())[0] == n:  # pick up the index of the neighbors
+#                     dist = neighs2[n]["distance"]
+#             dict_of_edge_attributes[edge] = dist
+#             list_of_edge_attributes.append(dist)
+#
+#             #exec(graph_name + ".add_edge(edge[0],edge[1], spatial_distance=dist)")
+#             patient_graphs[graph_name].add_edge(edge[0],edge[1], spatial_distance=dist)
+#
+#     #draw_network_graph(patient_graphs[graph_name],patient_label)
+#
+# """
+# 10 - 10,10,0.05
+# 20 - 10,10,0.25
+# 30 - 8,8,0.25
+# 40 - 8,8,0.30
+# 50 - 8,8,0.40
+# 60 - 5,5,0
+# """

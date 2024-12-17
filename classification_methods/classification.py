@@ -1,22 +1,28 @@
-from classification_methods.methods.knn_classifier import classify_cancer_invasion as knn_classifier_classify_cancer_invasion, \
+from classification_methods.methods.knn_classifier import \
+    classify_cancer_invasion as knn_classifier_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as knn_classifier_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as knn_classifier_classify_cancer_stage
-from classification_methods.methods.svm_classifier import classify_cancer_invasion as svm_classifier_classify_cancer_invasion, \
+from classification_methods.methods.svm_classifier import \
+    classify_cancer_invasion as svm_classifier_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as svm_classifier_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as svm_classifier_classify_cancer_stage
-from classification_methods.methods.lda_classifier import classify_cancer_invasion as lda_classifier_classify_cancer_invasion, \
+from classification_methods.methods.lda_classifier import \
+    classify_cancer_invasion as lda_classifier_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as lda_classifier_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as lda_classifier_classify_cancer_stage
 from classification_methods.methods.logistic_regression import \
     classify_cancer_invasion as logistic_regression_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as logistic_regression_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as logistic_regression_classify_cancer_stage
-from classification_methods.methods.decision_tree import classify_cancer_invasion as decision_tree_classify_cancer_invasion, \
+from classification_methods.methods.decision_tree import \
+    classify_cancer_invasion as decision_tree_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as decision_tree_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as decision_tree_classify_cancer_stage
-from classification_methods.methods.random_forest import classify_cancer_invasion as random_forest_classify_cancer_invasion, \
+from classification_methods.methods.random_forest import \
+    classify_cancer_invasion as random_forest_classify_cancer_invasion, \
     classify_cancer_vs_non_cancerous as random_forest_classify_cancer_vs_non_cancerous, \
     classify_cancer_stage as random_forest_classify_cancer_stage
+
 
 def perform_classification():
     """
@@ -29,7 +35,7 @@ def perform_classification():
 
     # List of classifiers to use
     classifier_list = ["logistic_regression", "svm_classifier", "knn_classifier",
-                       "decision_tree", "random_forest","lda_classifier", ]
+                       "decision_tree", "random_forest", "lda_classifier", ]
 
     # Mapping classifier methods to task-specific functions
     classifier_methods = {

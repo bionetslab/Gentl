@@ -10,10 +10,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from classification_methods.features_for_classification import selected_feature
+from classification_methods.methods.knn_classifier import classify_cancer_invasion, classify_cancer_vs_non_cancerous, \
+    classify_cancer_stage, classify_early_vs_late_stage, classify_ptc_vs_mibc
 
 
-def classify_cancer_stage(Dataframe_cancer_with_distance, metric):
+def cancer_stage_classifier(Dataframe_cancer_with_distance, metric):
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
 
     models = {
@@ -94,23 +95,28 @@ def plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_featur
 
 
 if __name__ == "__main__":
-    metric = "average_generation"  # average_generation,average_distance
-    selected_feature = "correlation" #[dissimilarity,correlation,energy,contrast,homogeneity]
-    Dataframe_cancer_with_distance = pd.read_csv(
-        f"../glcm_average_gentl_results/{selected_feature}_{metric}_results.csv"
-        )
-    csv_path = '../data/original/Al-Bladder Cancer/Data_CT only with anonymized ID 11-13-24_clean.csv'  # csv with cancer types
-    df_cancer_types = pd.read_csv(csv_path)
-
-    Dataframe_cancer_with_distance = pd.merge(
-        Dataframe_cancer_with_distance, df_cancer_types[["Final Path", "Anonymized ID"]], left_on='patient_id',
-        right_on="Anonymized ID", how='left'
-        )
-    Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.rename(
-        columns={"Final Path": "cancer_type"}
-        )
-    Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.drop("Anonymized ID", axis=1)
-    Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.set_index("patient_id")
-
-    accuracy_dict, f1_score_dict = classify_cancer_stage(Dataframe_cancer_with_distance, metric)
-    plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_feature)
+    # classify_cancer_vs_non_cancerous()
+    # classify_early_vs_late_stage()
+    classify_ptc_vs_mibc()
+    #classify_cancer_invasion()
+    #classify_cancer_stage()
+    # metric = "average_generation"  # average_generation,average_distance
+    # selected_feature = "correlation" #[dissimilarity,correlation,energy,contrast,homogeneity]
+    # Dataframe_cancer_with_distance = pd.read_csv(
+    #     f"../glcm_average_gentl_results/{selected_feature}_{metric}_results.csv"
+    #     )
+    # csv_path = '../data/original/Al-Bladder Cancer/Data_CT only with anonymized ID 11-13-24_clean.csv'  # csv with cancer types
+    # df_cancer_types = pd.read_csv(csv_path)
+    #
+    # Dataframe_cancer_with_distance = pd.merge(
+    #     Dataframe_cancer_with_distance, df_cancer_types[["Final Path", "Anonymized ID"]], left_on='patient_id',
+    #     right_on="Anonymized ID", how='left'
+    #     )
+    # Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.rename(
+    #     columns={"Final Path": "cancer_type"}
+    #     )
+    # Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.drop("Anonymized ID", axis=1)
+    # Dataframe_cancer_with_distance = Dataframe_cancer_with_distance.set_index("patient_id")
+    #
+    # accuracy_dict, f1_score_dict = classify_cancer_stage(Dataframe_cancer_with_distance, metric)
+    # plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_feature)

@@ -313,7 +313,7 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     print(ct_folder)
     print(f"Bbox length {len(set(bbox))}")
 
-    output_folder = "../data/with_50_bounding_boxes_within_bladder_region/"
+    output_folder = "../data/with_40_bounding_boxes_within_bladder_region/"
     filename = f"{ct_folder}.jpg"
     output_path = os.path.join(output_folder, filename)
 

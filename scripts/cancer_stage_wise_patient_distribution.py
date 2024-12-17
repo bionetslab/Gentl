@@ -26,5 +26,5 @@ for i, count in enumerate(stage_wise_count):
 
 # Show the plot
 plt.tight_layout()
-# plt.savefig("stage_wise_patient_distribution.pdf", format="pdf")
+# plt.savefig(f"./Results/stage_wise_patient_distribution.pdf", format="pdf")
 plt.show()

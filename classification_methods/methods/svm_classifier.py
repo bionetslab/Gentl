@@ -1,129 +1,288 @@
+import numpy as np
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
 from sklearn.metrics import f1_score
-from classification_methods.features_for_classification import get_features_by_type, get_all_features, \
-    get_features_by_sub_type
+from sklearn.svm import SVC
+from classification_methods.features_for_classification import get_features_by_invasion, get_all_features, \
+    get_features_by_stage, get_features_ptc_vs_mibc, get_early_late_stage_features, tasks, max_no_of_rois
 
 
 def classify_cancer_invasion():
     # #-------------------NMIBC Vs MIBC----------------------
-    Dataframe_cancer_with_types = get_features_by_type()
+    task = tasks[0]
+    Dataframe_cancer_with_types = get_features_by_invasion()
 
     X = Dataframe_cancer_with_types.drop(
-        columns=["label", "cancer_type", "cancer_type_label"]
+        columns=["label", "cancer_stage", "cancer_invasion_label"]
         )  # no need to drop index
-    y = Dataframe_cancer_with_types["cancer_type_label"]
+    y = Dataframe_cancer_with_types["cancer_invasion_label"]
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+
     # Initialize and train the SVM model
-    svm_model = SVC(
-        kernel='linear', C=100, random_state=42, class_weight='balanced'
+    model = SVC(
+        kernel="rbf",
+        C=100, random_state=42, class_weight='balanced'
         )  # since we have unbalanced data(24,41)
-    svm_model.fit(X_train, y_train)
 
-    # Make predictions on the test data
-    y_pred = svm_model.predict(X_test)
-    #
-    # Calculate accuracy score
-    accuracy = accuracy_score(y_test, y_pred) * 100
-    f1_score_ = f1_score(y_test, y_pred) * 100
+    # Define Stratified K-Fold for cross-validation
 
-    # print(f"Accuracy for MIBC vs NMIBC: {accuracy:.2f}%")
-    # print(f"F1-score for MIBC vs NMIBC: {f1_score_:.2f}%")
-    # print(classification_report(y_test, y_pred))
-    # #
-    # # """Accuracy for MIBC vs NMIBC: 69.23%
-    # # F1-score for MIBC vs NMIBC: 77.78%"""
-    return accuracy, f1_score_
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    # Perform cross-validation and compute scores
+    accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+    f1_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='f1')
+
+    # Compute average cross-validation scores
+    avg_accuracy = np.mean(accuracy_scores) * 100
+    avg_f1 = np.mean(f1_scores) * 100
+
+    print(f"Cross-Validation Average Accuracy: {avg_accuracy:.2f}%")
+    print(f"Cross-Validation Average F1-Score: {avg_f1:.2f}%")
+
+    # Train on the full training/validation set
+    model.fit(X_train, y_train)
+
+    # Evaluate on the test set
+    y_pred = model.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_pred) * 100
+    test_f1 = f1_score(y_test, y_pred) * 100
+
+    print(f"Test Set Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Set F1-Score: {test_f1:.2f}%")
+    print(classification_report(y_test, y_pred))
 
 
 def classify_cancer_stage():
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
-    Dataframe_cancer_with_types = get_features_by_sub_type()
+    task = tasks[2]
+    Dataframe_cancer_with_types = get_features_by_stage()
     X = Dataframe_cancer_with_types.drop(
-        columns=["label", "cancer_type", "cancer_sub_type_label"]
+        columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
-    y = Dataframe_cancer_with_types["cancer_sub_type_label"]
+    y = Dataframe_cancer_with_types["cancer_stage_label"]
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-    #
+
+    # best_param = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=False)
+
     # Initialize and train the SVM model
-    svm_model = SVC(
-        decision_function_shape='ovo', kernel="rbf", C=1, gamma=0.1, random_state=42, class_weight='balanced'
+    model = SVC(
+        decision_function_shape='ovo', kernel="linear", C=0.1, random_state=42, class_weight='balanced'
         )  # ovo - one vs one
-    svm_model.fit(X_train, y_train)
 
-    # Make predictions on the test data
-    y_pred = svm_model.predict(X_test)
-    #
-    # Calculate accuracy score
-    accuracy = accuracy_score(y_test, y_pred) * 100
-    f1_score_ = f1_score(y_test, y_pred, average="weighted") * 100  # specify average for multiclass problems
+    # Define Stratified K-Fold for cross-validation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-    # print(f"Accuracy for T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4: {accuracy:.2f}%")
-    # print(f"F1-score for T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4: {f1_score_:.2f}%")
-    # print(classification_report(y_test, y_pred))
-    # """Accuracy for T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4: 30.00%
-    # F1-score for T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4: 16.15%"""
-    return accuracy, f1_score_
+    # Perform cross-validation and compute scores
+    accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+    f1_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='f1_weighted')
+
+    # Compute average cross-validation scores
+    avg_accuracy = np.mean(accuracy_scores) * 100
+    avg_f1 = np.mean(f1_scores) * 100
+
+    print(f"Cross-Validation Average Accuracy: {avg_accuracy:.2f}%")
+    print(f"Cross-Validation Average F1-Score: {avg_f1:.2f}%")
+
+    # Train on the full training/validation set
+    model.fit(X_train, y_train)
+
+    # Evaluate on the test set
+    y_pred = model.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_pred) * 100
+    test_f1 = f1_score(y_test, y_pred, average="weighted") * 100  # specify average for multiclass problems
+
+    print(f"Test Set Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Set F1-Score: {test_f1:.2f}%")
+    print(classification_report(y_test, y_pred))
 
 
 def classify_cancer_vs_non_cancerous():
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
+    task = tasks[1]
     full_features_dataframe = get_all_features()
 
-    X = full_features_dataframe.drop(columns=["label","cancer_type"])  # no need to drop index
+    X = full_features_dataframe.drop(columns=["label", "cancer_stage"])  # no need to drop index
     y = full_features_dataframe["label"]
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    # hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+
+    # Define the SVM model with a linear kernel
+    model = SVC(kernel='rbf', C=1, gamma=1, random_state=42, class_weight='balanced')
+
+    # Define Stratified K-Fold for cross-validation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    # Perform cross-validation and compute scores
+    accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+    f1_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='f1')
+
+    # Compute average cross-validation scores
+    avg_accuracy = np.mean(accuracy_scores) * 100
+    avg_f1 = np.mean(f1_scores) * 100
+
+    print(f"Cross-Validation Average Accuracy: {avg_accuracy:.2f}%")
+    print(f"Cross-Validation Average F1-Score: {avg_f1:.2f}%")
+
+    # Train on the full training/validation set
+    model.fit(X_train, y_train)
+
+    # Evaluate on the test set
+    y_pred = model.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_pred) * 100
+    test_f1 = f1_score(y_test, y_pred) * 100
+
+    print(f"Test Set Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Set F1-Score: {test_f1:.2f}%")
+    print(classification_report(y_test, y_pred))
+
+
+def classify_early_vs_late_stage():
+    # ---------------------- Early [Ta,Tis] vs Late Stage [T1,T2,T3,T4]--------------------
+    task = tasks[3]
+    Dataframe_cancer_with_stages = get_early_late_stage_features()
+    X = Dataframe_cancer_with_stages.drop(
+        columns=["label", "cancer_stage", "cancer_stage_label"]
+        )  # no need to drop index
+    y = Dataframe_cancer_with_stages["cancer_stage_label"]
+
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.35, random_state=42, stratify=y)
+
+    # b = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+
+    # # Initialize and train the SVM model
+    model = SVC(kernel='rbf', C=0.1, gamma=0.1, random_state=42, class_weight='balanced')
     #
-    # Initialize and train the SVM model
-    svm_model = SVC(kernel='linear', C=1, random_state=42)
-    svm_model.fit(X_train, y_train)
+    # Define Stratified K-Fold for cross-validation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-    # Make predictions on the test data
-    y_pred = svm_model.predict(X_test)
-    #
-    # Calculate accuracy score
-    accuracy = accuracy_score(y_test, y_pred) * 100
-    f1_score_ = f1_score(y_test, y_pred) * 100
+    # Perform cross-validation and compute scores
+    accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+    f1_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='f1')
 
-    # print(f"Accuracy for cancer vs normal ROI: {accuracy:.2f}%")
-    # print(f"F1-score for cancer vs normal ROI: {f1_score_:.2f}%")
-    # print(classification_report(y_test, y_pred))
-    # """Accuracy for cancer vs normal ROI: 72.50%
-    # F1-score for cancer vs normal ROI: 77.55%"""
-    return accuracy, f1_score_
+    # Compute average cross-validation scores
+    avg_accuracy = np.mean(accuracy_scores) * 100
+    avg_f1 = np.mean(f1_scores) * 100
+
+    print(f"Cross-Validation Average Accuracy: {avg_accuracy:.2f}%")
+    print(f"Cross-Validation Average F1-Score: {avg_f1:.2f}%")
+
+    # Train on the full training set
+    model.fit(X_train, y_train)
+
+    # Evaluate on the test set
+    y_pred = model.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_pred) * 100
+    test_f1 = f1_score(y_test, y_pred) * 100
+
+    print(f"Test Set Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Set F1-Score: {test_f1:.2f}%")
+    print(classification_report(y_test, y_pred))
 
 
-#---------------Hyperparameter tuning--------------------
-# defining parameter range
-# param_grid = {'C': [0.1, 1, 10, 100, 1000],
-#               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-#               'kernel': ['rbf']}
-#
-# grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3)
-#
-# # fitting the model for grid search
-# grid.fit(X_train, y_train)
-#
-# # print best parameter after tuning
-# # print(grid.best_params_)
-#
-# # print how our model looks after hyper-parameter tuning
-# print(grid.best_estimator_)
-#
-# grid_predictions = grid.predict(X_test)
-#
-# # print classification report
-# print(classification_report(y_test, grid_predictions))
-"""Hyperparameter Tuning"""
+def classify_ptc_vs_mibc():
+    # ---------------------- Post Treatment changes [T0] vs  MIBC [T2,T3,T4]--------------------
+    task = tasks[4]
+    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc()
+    X = Dataframe_cancer_with_stages.drop(
+        columns=["label", "cancer_stage", "cancer_stage_label"]
+        )  # no need to drop index
+    y = Dataframe_cancer_with_stages["cancer_stage_label"]
 
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    #hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+
+    # # Initialize and train the SVM model
+    model = SVC(kernel='rbf', C=100, gamma=1, random_state=42, class_weight='balanced')
+
+    # Define Stratified K-Fold for cross-validation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    # Perform cross-validation and compute scores
+    accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+    f1_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='f1')
+
+    # Compute average cross-validation scores
+    avg_accuracy = np.mean(accuracy_scores) * 100
+    avg_f1 = np.mean(f1_scores) * 100
+
+    print(f"Cross-Validation Average Accuracy: {avg_accuracy:.2f}%")
+    print(f"Cross-Validation Average F1-Score: {avg_f1:.2f}%")
+
+    # Train on the full training set
+    model.fit(X_train, y_train)
+
+    # Evaluate on the test set
+    y_pred = model.predict(X_test)
+    test_accuracy = accuracy_score(y_test, y_pred) * 100
+    test_f1 = f1_score(y_test, y_pred) * 100
+
+    print(f"Test Set Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Set F1-Score: {test_f1:.2f}%")
+    print(classification_report(y_test, y_pred))
+
+
+def hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=False):
+    # ------------------- Hyperparameter tuning -------------------
+    # Defining parameter range
+    if rbf_param:
+        param_grid = {'C': [0.1, 1, 10, 100, 1000],
+                      'gamma': [1, 0.1, 0.01, 0.001, 0.0001, 'auto'],
+                      'kernel': ['rbf']}
+    else:
+        param_grid = {'C': [0.1, 1, 10, 100, 1000], 'kernel': ['linear']}
+
+    # Stratified K-Fold Cross-Validation
+    stratified_k_fold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    # GridSearchCV with StratifiedKFold
+    grid = GridSearchCV(SVC(class_weight="balanced"), param_grid, refit=True, cv=stratified_k_fold, verbose=3)
+    # grid = GridSearchCV(
+    # SVC(class_weight="balanced", decision_function_shape='ovo'), param_grid, refit=True,
+    # cv=stratified_k_fold,
+    # verbose=3
+    # )
+
+    # Fitting the model for grid search
+    grid.fit(X_train, y_train)
+
+    # Best parameters and best estimator
+    best_params = grid.best_params_
+    best_estimator = grid.best_estimator_
+
+    # Predictions on the test set
+    grid_predictions = grid.predict(X_test)
+
+    # Accuracy on test set
+    accuracy = accuracy_score(y_test, grid_predictions)
+
+    # Print results
+    print("Task:", task)
+    print("Best Estimator:", best_estimator)
+    print("Test Accuracy:", round(accuracy * 100, 2))
+    print("Classification Report on Test Data:\n", classification_report(y_test, grid_predictions))
+    # print(grid.cv_results_)
+
+    # Save results to a text file
+    with open("best_model.txt", "a") as file:
+        file.write("Task:\n")
+        file.write(f"{task} - {max_no_of_rois}\n\n")
+        file.write("Best Estimator:\n")
+        file.write(f"{best_estimator}\n\n")
+        file.write("Test Accuracy:\n")
+        file.write(f"{round(accuracy * 100, 2)}\n\n")
+    return grid.best_params_
 #----------------Plot Decision Boundary-----------------
 # DecisionBoundaryDisplay.from_estimator(
 #         svm_model,
