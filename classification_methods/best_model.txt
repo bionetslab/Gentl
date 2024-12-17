@@ -1,0 +1,171 @@
+Task:
+Classification of lesion vs control - 50
+
+Best Estimator:
+SVC(C=1, gamma=1)
+
+Test Accuracy:
+96.0
+
+Task:
+Classification of post treatment changes vs MIBC - 50
+
+Best Estimator:
+SVC(C=100, class_weight='balanced', gamma=1)
+
+Test Accuracy:
+75.0
+
+
+Task:
+Classification of cancer invasion - 50
+
+Best Estimator:
+SVC(C=1, class_weight='balanced', gamma=0.1)
+
+Test Accuracy:
+76.92
+
+Task:
+Classification of cancer stages - 50
+
+Best Estimator:
+SVC(C=0.1, class_weight='balanced', decision_function_shape='ovo',
+    kernel='linear')
+
+Test Accuracy:
+30.0
+
+Task:
+Classification of early vs late stage - 50
+
+Best Estimator:
+SVC(C=0.1, class_weight='balanced', gamma=0.1)
+
+Test Accuracy:
+69.23
+
+Task:
+Classification of cancer invasion - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(0.23357214690901212), class_weight='balanced',
+                   penalty='l1', solver='saga')
+
+Test Accuracy:
+69.23
+
+Task:
+Classification of cancer invasion - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(0.23357214690901212), class_weight='balanced',
+                   penalty='l1', solver='saga')
+
+Test Accuracy:
+69.23
+
+Task:
+Classification of lesion vs control - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(0.08858667904100823), class_weight='balanced',
+                   solver='liblinear')
+
+Test Accuracy:
+87.88
+
+Task:
+Classification of early vs late stage - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(206.913808111479), class_weight='balanced',
+                   penalty='l1', solver='liblinear')
+
+Test Accuracy:
+58.82
+
+
+Task:
+Classification of post treatment changes vs MIBC - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(0.0001), class_weight='balanced', max_iter=1000,
+                   penalty='l1', solver='saga')
+
+Test Accuracy:
+43.75
+
+Task:
+Classification of cancer stages - 50
+
+Best Estimator:
+LogisticRegression(C=np.float64(0.0001), class_weight='balanced',
+                   multi_class='ovr', penalty='l1', solver='liblinear')
+
+Test Accuracy:
+35.0
+
+Task:
+Classification of cancer invasion - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(6))
+
+Test Accuracy:
+76.92
+
+Task:
+Classification of lesion vs control - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(8))
+
+Test Accuracy:
+93.94
+
+Task:
+Classification of cancer stages - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(6))
+
+Test Accuracy:
+30.0
+
+Task:
+Classification of early vs late stage - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(7))
+
+Test Accuracy:
+76.92
+
+Task:
+Classification of early vs late stage - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(6))
+
+Test Accuracy:
+64.71
+
+Task:
+Classification of early vs late stage - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(3))
+
+Test Accuracy:
+70.0
+
+Task:
+Classification of post treatment changes vs MIBC - 50
+
+Best Estimator:
+KNeighborsClassifier(n_neighbors=np.int64(2))
+
+Test Accuracy:
+62.5
+
