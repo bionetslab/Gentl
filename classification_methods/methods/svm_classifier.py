@@ -4,13 +4,13 @@ from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKF
 from sklearn.metrics import f1_score
 from sklearn.svm import SVC
 from classification_methods.features_for_classification import get_features_by_invasion, get_all_features, \
-    get_features_by_stage, get_features_ptc_vs_mibc, get_early_late_stage_features, tasks, max_no_of_rois
+    get_features_by_stage, get_features_ptc_vs_mibc, get_early_late_stage_features, get_tasks
 
 
-def classify_cancer_invasion():
+def classify_cancer_invasion(selected_feature, max_no_of_rois):
     # #-------------------NMIBC Vs MIBC----------------------
-    task = tasks[0]
-    Dataframe_cancer_with_types = get_features_by_invasion()
+    task = get_tasks()[0]
+    Dataframe_cancer_with_types = get_features_by_invasion(selected_feature, max_no_of_rois)
 
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_invasion_label"]
@@ -20,7 +20,7 @@ def classify_cancer_invasion():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois,rbf_param=True)
 
     # Initialize and train the SVM model
     model = SVC(
@@ -55,11 +55,13 @@ def classify_cancer_invasion():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_stage():
+
+def classify_cancer_stage(selected_feature, max_no_of_rois):
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
-    task = tasks[2]
-    Dataframe_cancer_with_types = get_features_by_stage()
+    task = get_tasks()[2]
+    Dataframe_cancer_with_types = get_features_by_stage(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -68,7 +70,7 @@ def classify_cancer_stage():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # best_param = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=False)
+    # best_param = hyperparameter_tuning(task, X_train, y_train, X_test, y_test,max_no_of_rois, rbf_param=False)
 
     # Initialize and train the SVM model
     model = SVC(
@@ -76,7 +78,7 @@ def classify_cancer_stage():
         )  # ovo - one vs one
 
     # Define Stratified K-Fold for cross-validation
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
     # Perform cross-validation and compute scores
     accuracy_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
@@ -101,11 +103,13 @@ def classify_cancer_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_vs_non_cancerous():
+
+def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
-    task = tasks[1]
-    full_features_dataframe = get_all_features()
+    task = get_tasks()[1]
+    full_features_dataframe = get_all_features(selected_feature, max_no_of_rois)
 
     X = full_features_dataframe.drop(columns=["label", "cancer_stage"])  # no need to drop index
     y = full_features_dataframe["label"]
@@ -113,7 +117,7 @@ def classify_cancer_vs_non_cancerous():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+    # hyperparameter_tuning(task, X_train, y_train, X_test, y_test,max_no_of_rois, rbf_param=True)
 
     # Define the SVM model with a linear kernel
     model = SVC(kernel='rbf', C=1, gamma=1, random_state=42, class_weight='balanced')
@@ -144,11 +148,13 @@ def classify_cancer_vs_non_cancerous():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_early_vs_late_stage():
+
+def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
     # ---------------------- Early [Ta,Tis] vs Late Stage [T1,T2,T3,T4]--------------------
-    task = tasks[3]
-    Dataframe_cancer_with_stages = get_early_late_stage_features()
+    task = get_tasks()[3]
+    Dataframe_cancer_with_stages = get_early_late_stage_features(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -157,7 +163,7 @@ def classify_early_vs_late_stage():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.35, random_state=42, stratify=y)
 
-    # b = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+    # b = hyperparameter_tuning(task, X_train, y_train, X_test, y_test,max_no_of_rois, rbf_param=True)
 
     # # Initialize and train the SVM model
     model = SVC(kernel='rbf', C=0.1, gamma=0.1, random_state=42, class_weight='balanced')
@@ -188,11 +194,13 @@ def classify_early_vs_late_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_ptc_vs_mibc():
+
+def classify_ptc_vs_mibc(selected_feature, max_no_of_rois):
     # ---------------------- Post Treatment changes [T0] vs  MIBC [T2,T3,T4]--------------------
-    task = tasks[4]
-    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc()
+    task = get_tasks()[4]
+    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -201,7 +209,7 @@ def classify_ptc_vs_mibc():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    #hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=True)
+    #hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois,rbf_param=True)
 
     # # Initialize and train the SVM model
     model = SVC(kernel='rbf', C=100, gamma=1, random_state=42, class_weight='balanced')
@@ -232,8 +240,10 @@ def classify_ptc_vs_mibc():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def hyperparameter_tuning(task, X_train, y_train, X_test, y_test, rbf_param=False):
+
+def hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois,rbf_param=False):
     # ------------------- Hyperparameter tuning -------------------
     # Defining parameter range
     if rbf_param:

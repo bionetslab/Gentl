@@ -10,7 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from classification_methods.methods.knn_classifier import classify_cancer_invasion, classify_cancer_vs_non_cancerous, \
+from classification_methods.methods.logistic_regression import classify_cancer_invasion, classify_cancer_vs_non_cancerous, \
     classify_cancer_stage, classify_early_vs_late_stage, classify_ptc_vs_mibc
 
 
@@ -59,7 +59,7 @@ def cancer_stage_classifier(Dataframe_cancer_with_distance, metric):
     return accuracy_dict, f1_score_dict
 
 
-def plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_feature):
+def plot_all_classifier_performance(accuracy_dict, f1_score_dict, selected_feature):
     """
     Plot accuracy and F1 score for each classifier for 3 different tasks
     """
@@ -71,16 +71,15 @@ def plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_featur
     # Set positions for the bars
     index = np.arange(len(classifiers))
 
-
     plt.figure(figsize=(10, 5))
     plt.bar(
-            index - bar_width / 2, [accuracy_dict[classifier] for classifier in classifiers], bar_width,
-            label='Accuracy'
-            )
+        index - bar_width / 2, [accuracy_dict[classifier] for classifier in classifiers], bar_width,
+        label='Accuracy'
+        )
     plt.bar(
-            index + bar_width / 2, [f1_score_dict[classifier] for classifier in classifiers], bar_width,
-            label='F1 Score'
-            )
+        index + bar_width / 2, [f1_score_dict[classifier] for classifier in classifiers], bar_width,
+        label='F1 Score'
+        )
 
     # Add title, labels, and legend
     plt.title(f"Gentl result using {selected_feature}")
@@ -95,11 +94,13 @@ def plot_all_classifier_performance(accuracy_dict, f1_score_dict,selected_featur
 
 
 if __name__ == "__main__":
-    # classify_cancer_vs_non_cancerous()
-    # classify_early_vs_late_stage()
-    classify_ptc_vs_mibc()
-    #classify_cancer_invasion()
-    #classify_cancer_stage()
+    s_f = "contrast" # [dissimilarity,energy,contrast,homogeneity]
+    max_rois = 50
+    classify_cancer_invasion(s_f, max_rois)
+    classify_cancer_vs_non_cancerous(s_f, max_rois)
+    classify_cancer_stage(s_f, max_rois)
+    classify_early_vs_late_stage(s_f, max_rois)
+    classify_ptc_vs_mibc(s_f, max_rois)
     # metric = "average_generation"  # average_generation,average_distance
     # selected_feature = "correlation" #[dissimilarity,correlation,energy,contrast,homogeneity]
     # Dataframe_cancer_with_distance = pd.read_csv(

@@ -6,13 +6,13 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import StandardScaler
 
 from classification_methods.features_for_classification import get_features_by_invasion, get_all_features, \
-    get_features_by_stage, get_early_late_stage_features, get_features_ptc_vs_mibc, max_no_of_rois, tasks
+    get_features_by_stage, get_early_late_stage_features, get_features_ptc_vs_mibc, get_tasks
 
 
-def classify_cancer_invasion():
+def classify_cancer_invasion(selected_feature, max_no_of_rois):
     # -------------------NMIBC Vs MIBC----------------------
-    task = tasks[0]
-    Dataframe_cancer_with_types = get_features_by_invasion()
+    task = get_tasks()[0]
+    Dataframe_cancer_with_types = get_features_by_invasion(selected_feature, max_no_of_rois)
 
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_invasion_label"]
@@ -28,12 +28,17 @@ def classify_cancer_invasion():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
-    # # Train Logistic regression model
+    # Train Logistic regression model
+    if selected_feature == "contrast":
+        C = 0.2
+    else:
+        C = 11.288378916846883
     model = LogisticRegression(
-        C=0.2, penalty='l1', solver='saga', class_weight="balanced", random_state=42, max_iter=1000
-        )
+            C=C, class_weight='balanced',
+            solver='sag', max_iter=1500, random_state=42
+            )
 
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -61,11 +66,13 @@ def classify_cancer_invasion():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_vs_non_cancerous():
+
+def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
-    task = tasks[1]
-    full_features_dataframe = get_all_features()
+    task = get_tasks()[1]
+    full_features_dataframe = get_all_features(selected_feature, max_no_of_rois)
     X = full_features_dataframe.drop(columns=["label", "cancer_stage"])  # no need to drop index
     y = full_features_dataframe["label"]
 
@@ -77,7 +84,7 @@ def classify_cancer_vs_non_cancerous():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Train Logistic regression model
     model = LogisticRegression(random_state=42, C=0.08, class_weight='balanced', solver='liblinear')
@@ -108,11 +115,13 @@ def classify_cancer_vs_non_cancerous():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_stage():
+
+def classify_cancer_stage(selected_feature, max_no_of_rois):
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
-    task = tasks[2]
-    Dataframe_cancer_with_types = get_features_by_stage()
+    task = get_tasks()[2]
+    Dataframe_cancer_with_types = get_features_by_stage(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -126,7 +135,7 @@ def classify_cancer_stage():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Initialize and train the Logistic Regression model
     base_model = LogisticRegression(
@@ -160,11 +169,13 @@ def classify_cancer_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_early_vs_late_stage():
+
+def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
     # ---------------------- Early [Ta,Tis] vs Late Stage [T1,T2,T3,T4]--------------------
-    task = tasks[3]
-    Dataframe_cancer_with_stages = get_early_late_stage_features()
+    task = get_tasks()[3]
+    Dataframe_cancer_with_stages = get_early_late_stage_features(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -178,10 +189,17 @@ def classify_early_vs_late_stage():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Train Logistic regression model
-    model = LogisticRegression(C=206,penalty='l1', solver='liblinear',class_weight="balanced", random_state=42)
+    if selected_feature == "dissimilarity":
+        C = 78.47599703514607
+    else:
+        C = 206
+    model = LogisticRegression(
+        C=C, class_weight='balanced',
+        penalty='l1', solver='liblinear', max_iter=1000, random_state=42
+        )
 
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -209,12 +227,14 @@ def classify_early_vs_late_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_ptc_vs_mibc():
+
+def classify_ptc_vs_mibc(selected_feature, max_no_of_rois):
     # ---------------------- Post Treatment changes [T0] vs  MIBC [T2,T3,T4]--------------------
 
-    task = tasks[4]
-    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc()
+    task = get_tasks()[4]
+    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -228,7 +248,7 @@ def classify_ptc_vs_mibc():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # # Train Logistic regression model
     model = LogisticRegression(class_weight="balanced", random_state=42)
@@ -259,8 +279,10 @@ def classify_ptc_vs_mibc():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def hyperparameter_tuning(task, X_train, y_train, X_test, y_test):
+
+def hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois):
     # ------------------- Hyperparameter tuning -------------------
 
     # Defining parameter range
@@ -268,7 +290,7 @@ def hyperparameter_tuning(task, X_train, y_train, X_test, y_test):
         {'penalty': ['l1', 'l2', 'elasticnet', 'none'],
          'C': np.logspace(-4, 4, 20),
          'solver': ['lbfgs', 'newton-cg', 'liblinear', 'sag', 'saga'],
-         'max_iter': [100, 500, 1000]
+         'max_iter': [100, 500, 1000, 1500, 2000]
          }
         ]
 

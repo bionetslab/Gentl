@@ -4,13 +4,13 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearc
 from sklearn.ensemble import RandomForestClassifier
 
 from classification_methods.features_for_classification import get_features_by_invasion, get_all_features, \
-    get_features_by_stage, get_early_late_stage_features, get_features_ptc_vs_mibc, max_no_of_rois, tasks
+    get_features_by_stage, get_early_late_stage_features, get_features_ptc_vs_mibc, get_tasks
 
 
-def classify_cancer_invasion():
+def classify_cancer_invasion(selected_feature, max_no_of_rois):
     # -------------------NMIBC Vs MIBC----------------------
-    task = tasks[0]
-    Dataframe_cancer_with_types = get_features_by_invasion()
+    task = get_tasks()[0]
+    Dataframe_cancer_with_types = get_features_by_invasion(selected_feature, max_no_of_rois)
 
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_invasion_label"]
@@ -21,7 +21,7 @@ def classify_cancer_invasion():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Create RandomForest Classifier
     model = RandomForestClassifier(class_weight='balanced', max_depth=5, min_samples_leaf=5, n_estimators=10)
@@ -52,18 +52,20 @@ def classify_cancer_invasion():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_vs_non_cancerous():
+
+def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
-    task = tasks[1]
-    full_features_dataframe = get_all_features()
+    task = get_tasks()[1]
+    full_features_dataframe = get_all_features(selected_feature, max_no_of_rois)
     X = full_features_dataframe.drop(columns=["label", "cancer_stage"])  # no need to drop index
     y = full_features_dataframe["label"]
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Create Random Forest classifier
     model = RandomForestClassifier(
@@ -97,11 +99,13 @@ def classify_cancer_vs_non_cancerous():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_cancer_stage():
+
+def classify_cancer_stage(selected_feature, max_no_of_rois):
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
-    task = tasks[2]
-    Dataframe_cancer_with_types = get_features_by_stage()
+    task = get_tasks()[2]
+    Dataframe_cancer_with_types = get_features_by_stage(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -110,11 +114,13 @@ def classify_cancer_stage():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Initialize and train the Random Forest classifier
-    model = RandomForestClassifier(class_weight='balanced', max_depth=2,
-                           min_samples_leaf=100, n_estimators=200)
+    model = RandomForestClassifier(
+        class_weight='balanced', max_depth=2,
+        min_samples_leaf=100, n_estimators=200
+        )
 
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
@@ -142,12 +148,14 @@ def classify_cancer_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_early_vs_late_stage():
+
+def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
     # ---------------------- Early [Ta,Tis] vs Late Stage [T1,T2,T3,T4]--------------------
 
-    task = tasks[3]
-    Dataframe_cancer_with_stages = get_early_late_stage_features()
+    task = get_tasks()[3]
+    Dataframe_cancer_with_stages = get_early_late_stage_features(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -156,11 +164,13 @@ def classify_early_vs_late_stage():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Initialize and train the Random Forest classifier
-    model = RandomForestClassifier(class_weight='balanced', max_depth=2,
-                           min_samples_leaf=20)
+    model = RandomForestClassifier(
+        class_weight='balanced', max_depth=2,
+        min_samples_leaf=20
+        )
     #
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -188,11 +198,13 @@ def classify_early_vs_late_stage():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def classify_ptc_vs_mibc():
+
+def classify_ptc_vs_mibc(selected_feature, max_no_of_rois):
     # ---------------------- Post Treatment changes [T0] vs  MIBC [T2,T3,T4]--------------------
-    task = tasks[4]
-    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc()
+    task = get_tasks()[4]
+    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(selected_feature, max_no_of_rois)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -201,11 +213,13 @@ def classify_ptc_vs_mibc():
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test)
+    # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Initialize and train the Random Forest classifier
-    model = RandomForestClassifier(class_weight='balanced', max_depth=2,
-                           min_samples_leaf=20, n_estimators=10)
+    model = RandomForestClassifier(
+        class_weight='balanced', max_depth=2,
+        min_samples_leaf=20, n_estimators=10
+        )
 
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -233,13 +247,15 @@ def classify_ptc_vs_mibc():
     print(f"Test Set F1-Score: {test_f1:.2f}%")
     print(classification_report(y_test, y_pred))
 
+    return avg_accuracy, avg_f1, test_accuracy, test_f1
 
-def hyperparameter_tuning(task, X_train, y_train, X_test, y_test):
+
+def hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois):
     # ------------------- Hyperparameter tuning -------------------
 
     # Defining parameter range
     param_grid = {
-        'max_depth': [2, 3, 5, 10, 20],
+        'max_depth': [2, 3, 5, 10, 20, 30, 40, 50],
         'min_samples_leaf': [5, 10, 20, 50, 100, 200],
         'n_estimators': [10, 25, 30, 50, 100, 200]
         }
