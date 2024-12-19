@@ -237,16 +237,17 @@ def average_mean_distance_results_over_trials(feature_name, feature_df, num_tria
 # Run the test of gentl and GMM integration
 if __name__ == "__main__":
     # Example of running gentl with any feature
-    feature_df = pd.read_csv('../Gentl/glcm_extracted_features_results/glcm_dissimilarity_features_20_rois.csv')
-    feature_name = 'dissimilarity'  # You can change this to 'correlation', 'energy', 'contrast', or 'homogeneity'
-    # feature_df = pd.read_csv('../Gentl/scripts/glcm_correlation_features_100_rois.csv')
+    # You can change this to 'correlation', 'energy', 'contrast', or 'homogeneity'
+    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_dissimilarity_features_50_rois.csv')
+    # feature_name = 'dissimilarity'
+    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_correlation_features_50_rois.csv')
     # feature_name = 'correlation'
-    # feature_df = pd.read_csv('../Gentl/scripts/glcm_energy_features_100_rois.csv')
+    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_energy_features_50_rois.csv')
     # feature_name = 'energy'
-    # feature_df = pd.read_csv('../Gentl/scripts/glcm_contrast_features_100_rois.csv')
+    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_contrast_features_50_rois.csv')
     # feature_name = 'contrast'
-    # feature_df = pd.read_csv('../Gentl/scripts/glcm_homogeneity_features_100_rois.csv')
-    # feature_name = 'homogeneity'
+    feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_homogeneity_features_50_rois.csv')
+    feature_name = 'homogeneity'
 
     # Case1.1: Sort and display patients by best distance
     # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=57, alpha=0.05, max_generations=8)
@@ -265,7 +266,7 @@ if __name__ == "__main__":
 
     # Case2: Sort and display patients by generation:
     # hint: set different Np_cap values for different number of rois: Np_cap≥rois
-    # 10rois->15np, 20rois->25np, 50rois->55np, 100rois->110np
+    # 10rois->7np, 20rois->12np, 30rois->17np, 40rois->22np, 50rois->27np
     # optimization_generation_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=50, alpha=0.05, max_generations=10000)
     # sorted_by_generation = sort_patients_by_generation(optimization_generation_results)
     # print("\nSorted results by number of iterations:")
@@ -273,11 +274,12 @@ if __name__ == "__main__":
     #     print(f"Patient {result['patient_id']}, Number of iterations: {result['generation']}")
     #
     # Run multiple trials and save average results to CSV
-    # average_best_distance_results_over_trials(feature_name, feature_df, max_generations=4)
-    # average_mean_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=12, alpha=0.05,
-    #                                           max_generations=8, distance_mode='absolute')
-    average_generation_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=20, alpha=0.05,
-                                           max_generations=200)
+    average_best_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=27, alpha=0.05,
+                                              max_generations=4, distance_mode='absolute')
+    average_mean_distance_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=27, alpha=0.05,
+                                              max_generations=4, distance_mode='absolute')
+    average_generation_results_over_trials(feature_name, feature_df, num_trials=20, Np_cap=27, alpha=0.05,
+                                           max_generations=1000, distance_mode='absolute')
 
 
 
