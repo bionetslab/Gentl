@@ -7,10 +7,10 @@ from classification_methods.features_for_classification import get_features_by_i
     get_features_by_stage, get_early_late_stage_features, get_features_ptc_vs_mibc, get_tasks
 
 
-def classify_cancer_invasion(selected_feature, max_no_of_rois):
+def classify_cancer_invasion(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     # -------------------NMIBC Vs MIBC----------------------
     task = get_tasks()[0]
-    Dataframe_cancer_with_types = get_features_by_invasion(selected_feature, max_no_of_rois)
+    Dataframe_cancer_with_types = get_features_by_invasion(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag)
 
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_invasion_label"]
@@ -24,7 +24,7 @@ def classify_cancer_invasion(selected_feature, max_no_of_rois):
     # best_params = hyperparameter_tuning(task, X_train, y_train, X_test, y_test, max_no_of_rois)
 
     # # Create RandomForest Classifier
-    model = RandomForestClassifier(class_weight='balanced', max_depth=5, min_samples_leaf=5, n_estimators=10)
+    model = RandomForestClassifier(class_weight='balanced', max_depth=5, min_samples_leaf=5, n_estimators=10,random_state=42)
     #
     # Define Stratified K-Fold for cross-validation
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -55,7 +55,7 @@ def classify_cancer_invasion(selected_feature, max_no_of_rois):
     return avg_accuracy, avg_f1, test_accuracy, test_f1
 
 
-def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
+def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     # #-------------------Cancer Vs Non-cancer-----------------------------------------
     task = get_tasks()[1]
     full_features_dataframe = get_all_features(selected_feature, max_no_of_rois)
@@ -70,7 +70,7 @@ def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
     # # Create Random Forest classifier
     model = RandomForestClassifier(
         class_weight='balanced', max_depth=10,
-        min_samples_leaf=5, n_estimators=200
+        min_samples_leaf=5, n_estimators=200,random_state=42
         )
     #
     # Define Stratified K-Fold for cross-validation
@@ -102,10 +102,10 @@ def classify_cancer_vs_non_cancerous(selected_feature, max_no_of_rois):
     return avg_accuracy, avg_f1, test_accuracy, test_f1
 
 
-def classify_cancer_stage(selected_feature, max_no_of_rois):
+def classify_cancer_stage(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
     task = get_tasks()[2]
-    Dataframe_cancer_with_types = get_features_by_stage(selected_feature, max_no_of_rois)
+    Dataframe_cancer_with_types = get_features_by_stage(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag)
     X = Dataframe_cancer_with_types.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -119,7 +119,7 @@ def classify_cancer_stage(selected_feature, max_no_of_rois):
     # # Initialize and train the Random Forest classifier
     model = RandomForestClassifier(
         class_weight='balanced', max_depth=2,
-        min_samples_leaf=100, n_estimators=200
+        min_samples_leaf=100, n_estimators=200,random_state=42
         )
 
     # Define Stratified K-Fold for cross-validation
@@ -151,11 +151,11 @@ def classify_cancer_stage(selected_feature, max_no_of_rois):
     return avg_accuracy, avg_f1, test_accuracy, test_f1
 
 
-def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
+def classify_early_vs_late_stage(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     # ---------------------- Early [Ta,Tis] vs Late Stage [T1,T2,T3,T4]--------------------
 
     task = get_tasks()[3]
-    Dataframe_cancer_with_stages = get_early_late_stage_features(selected_feature, max_no_of_rois)
+    Dataframe_cancer_with_stages = get_early_late_stage_features(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -169,7 +169,7 @@ def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
     # # Initialize and train the Random Forest classifier
     model = RandomForestClassifier(
         class_weight='balanced', max_depth=2,
-        min_samples_leaf=20
+        min_samples_leaf=20,random_state=42
         )
     #
     # Define Stratified K-Fold for cross-validation
@@ -201,10 +201,10 @@ def classify_early_vs_late_stage(selected_feature, max_no_of_rois):
     return avg_accuracy, avg_f1, test_accuracy, test_f1
 
 
-def classify_ptc_vs_mibc(selected_feature, max_no_of_rois):
+def classify_ptc_vs_mibc(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     # ---------------------- Post Treatment changes [T0] vs  MIBC [T2,T3,T4]--------------------
     task = get_tasks()[4]
-    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(selected_feature, max_no_of_rois)
+    Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag)
     X = Dataframe_cancer_with_stages.drop(
         columns=["label", "cancer_stage", "cancer_stage_label"]
         )  # no need to drop index
@@ -218,7 +218,7 @@ def classify_ptc_vs_mibc(selected_feature, max_no_of_rois):
     # # Initialize and train the Random Forest classifier
     model = RandomForestClassifier(
         class_weight='balanced', max_depth=2,
-        min_samples_leaf=20, n_estimators=10
+        min_samples_leaf=20, n_estimators=10, random_state=42
         )
 
     # Define Stratified K-Fold for cross-validation

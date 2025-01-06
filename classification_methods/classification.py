@@ -41,7 +41,7 @@ from classification_methods.methods.random_forest import \
     classify_ptc_vs_mibc as random_forest_classify_ptc_vs_mibc
 
 
-def perform_classification(selected_feature, max_no_of_rois):
+def perform_classification(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
     """
     Performs classification using the classifiers in the list
 
@@ -120,13 +120,19 @@ def perform_classification(selected_feature, max_no_of_rois):
     # Loop through classifiers and tasks
     for method in classifier_list:
         for task, func in classifier_methods[method].items():
-            # Call the function and store results
-            _, _, acc, f1_score = func(selected_feature, max_no_of_rois)
+            # Skip "cancer_vs_non_cancerous" if gentl_flag is True
+            if gentl_flag and task == "cancer_vs_non_cancerous":
+                continue
+
+            # Call the function and store test accuracy and test f1 score results
+            _, _, acc, f1_score = func(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag)
             accuracy_dict[task][method] = round(acc, 2)
             f1_score_dict[task][method] = float(round(f1_score, 2))
 
-    # Print results (optional)
+    # Print results
     for task in accuracy_dict:
+        if gentl_flag and task == "cancer_vs_non_cancerous":
+            continue
         print(f"Task: {task}")
         print(f"Accuracy: {accuracy_dict[task]}")
         print(f"F1 Score: {f1_score_dict[task]}")

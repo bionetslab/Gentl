@@ -2,6 +2,27 @@ import numpy as np
 import pandas as pd
 
 
+def get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param):
+    """
+    Fetch the gentl result csv and add labels
+
+    Arguments:
+    selected_feature: glcm features
+    max_no_of_rois: no of extracted rois
+    gentl_result_param: average mean distance,best distance or average generation
+
+    Returns:
+    Dataframe with labels marked
+    """
+    gentl_dataframe = pd.read_csv(
+        f"../glcm_bladder_average_gentl_results/{max_no_of_rois}/{gentl_result_param}/"
+        f"{selected_feature}_{gentl_result_param}_{max_no_of_rois}_rois.csv"
+        )
+    patient_count = len(gentl_dataframe['patient_id'])
+    gentl_dataframe["label"] = list(map(int, np.ones(patient_count, dtype=int)))
+    return gentl_dataframe
+
+
 def get_features_from_csv(selected_feature, max_no_of_rois):
     max_no_of_rois = max_no_of_rois  # can be set to 10,20,30,40,50
     selected_feature = selected_feature  # [dissimilarity,correlation,energy,contrast,homogeneity]
@@ -70,7 +91,7 @@ def get_features_from_csv(selected_feature, max_no_of_rois):
     return cancer_features_df, healthy_features_df
 
 
-def get_features_by_invasion(selected_feature, max_no_of_rois):
+def get_features_by_invasion(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
     """
     Merge cancer features to include label for NMIBC(0) {Ta,Tis,T1} and MIBC(1) {T2,T3,T4}
 
@@ -79,18 +100,21 @@ def get_features_by_invasion(selected_feature, max_no_of_rois):
      cancer features, and binary cancer type labels (0 for NMIBC, 1 for MIBC).
     """
     # -------------------NMIBC Vs MIBC----------------------
-    cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
+    if gentl_flag:
+        cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
+    else:
+        cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
     Dataframe_cancer_with_stages = filter_T0_based_on_flag(cancer_features_df)
     Dataframe_cancer_with_stages["cancer_invasion_label"] = Dataframe_cancer_with_stages["cancer_stage"].map(
         {"Ta": 0, "Tis": 0, "T1": 0, "T2": 1, "T3": 1, "T4": 1}
         ).astype(int)
-    # Dataframe_cancer_with_stages.to_csv(
-    #     f"./features/{max_no_of_rois}/glcm_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_invasion.csv"
-    #     )
+    Dataframe_cancer_with_stages.to_csv(
+        f"./features/{max_no_of_rois}/gentl_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_invasion.csv"
+        )
     return Dataframe_cancer_with_stages
 
 
-def get_features_by_stage(selected_feature, max_no_of_rois):
+def get_features_by_stage(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     """
     Merge cancer features to include label for different stages
 
@@ -98,7 +122,10 @@ def get_features_by_stage(selected_feature, max_no_of_rois):
     Dataframe_cancer_with_types: A dataframe with patient IDs, cancer features, and label for cancer stage.
     """
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
-    cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
+    if gentl_flag:
+        cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
+    else:
+        cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
     Dataframe_cancer_with_stages = filter_T0_based_on_flag(cancer_features_df, False)
     stage_mapping = {
         "T0": 0, "Ta": 1, "Tis": 2, "T1": 3, "T2": 4, "T3": 5, "T4": 6
@@ -130,8 +157,11 @@ def get_all_features(selected_feature, max_no_of_rois):
     return full_features_dataframe
 
 
-def get_early_late_stage_features(selected_feature, max_no_of_rois):
-    cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
+def get_early_late_stage_features(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
+    if gentl_flag:
+        cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
+    else:
+        cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
     Dataframe_cancer_with_stages = filter_T0_based_on_flag(cancer_features_df)
     stage_mapping = {
         "Ta": 0, "Tis": 0,
@@ -146,12 +176,15 @@ def get_early_late_stage_features(selected_feature, max_no_of_rois):
     return Dataframe_cancer_with_stages
 
 
-def get_features_ptc_vs_mibc(selected_feature, max_no_of_rois):
+def get_features_ptc_vs_mibc(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
     """
     Retrieves features for Post-Treatment Changes (PTC) [T0] versus Muscle-Invasive Bladder Cancer (MIBC) [T2,T3,T4]
 
     """
-    cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
+    if gentl_flag:
+        cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
+    else:
+        cancer_features_df, _ = get_features_from_csv(selected_feature, max_no_of_rois)
     Dataframe_features = filter_T0_based_on_flag(cancer_features_df, False)
 
     Dataframe_features = Dataframe_features.loc[
@@ -207,10 +240,9 @@ def get_tasks():
              "Classification of early vs late stage", "Classification of post treatment changes vs MIBC"]
     return tasks
 
-
 # if __name__ == "__main__":
-    # get_features_by_invasion(selected_feature="dissimilarity", max_no_of_rois=10)
-    # get_features_by_stage(selected_feature="dissimilarity", max_no_of_rois=10)
-    # get_all_features(selected_feature="dissimilarity", max_no_of_rois=10)
-    # get_early_late_stage_features(selected_feature="dissimilarity", max_no_of_rois=10)
-    # get_features_ptc_vs_mibc(selected_feature="dissimilarity", max_no_of_rois=10)
+# get_features_by_invasion(selected_feature="dissimilarity", max_no_of_rois=10)
+# get_features_by_stage(selected_feature="dissimilarity", max_no_of_rois=10)
+# get_all_features(selected_feature="dissimilarity", max_no_of_rois=10)
+# get_early_late_stage_features(selected_feature="dissimilarity", max_no_of_rois=10)
+# get_features_ptc_vs_mibc(selected_feature="dissimilarity", max_no_of_rois=10)
