@@ -67,7 +67,7 @@ def get_features_from_csv(selected_feature, max_no_of_rois):
         healthy_features = healthy_data[selected_feature].values
 
         # Randomly select a healthy roi from max roi number or set a number eg 5
-        random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 9
+        random_feature_set_index = np.random.randint(0, max_no_of_rois) if random_selection else 3
         start_index = random_feature_set_index * features_per_roi
         end_index = start_index + features_per_roi
 
@@ -108,9 +108,9 @@ def get_features_by_invasion(selected_feature, max_no_of_rois, gentl_result_para
     Dataframe_cancer_with_stages["cancer_invasion_label"] = Dataframe_cancer_with_stages["cancer_stage"].map(
         {"Ta": 0, "Tis": 0, "T1": 0, "T2": 1, "T3": 1, "T4": 1}
         ).astype(int)
-    Dataframe_cancer_with_stages.to_csv(
-        f"./features/{max_no_of_rois}/gentl_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_invasion.csv"
-        )
+    # Dataframe_cancer_with_stages.to_csv(
+    #     f"./features/{max_no_of_rois}/gentl_cancer_{selected_feature}_features_{max_no_of_rois}_rois_with_invasion.csv"
+    #     )
     return Dataframe_cancer_with_stages
 
 

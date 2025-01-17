@@ -124,9 +124,9 @@ def perform_classification(selected_feature, max_no_of_rois, gentl_result_param,
             if gentl_flag and task == "cancer_vs_non_cancerous":
                 continue
 
-            # Call the function and store test accuracy and test f1 score results
-            _, _, acc, f1_score = func(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag)
-            accuracy_dict[task][method] = round(acc, 2)
+            # Call the function and store test accuracy and test f1 score results - use last two
+            acc, f1_score, _, _ = func(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag)
+            accuracy_dict[task][method] = float(round(acc, 2))
             f1_score_dict[task][method] = float(round(f1_score, 2))
 
     # Print results

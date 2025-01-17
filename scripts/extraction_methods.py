@@ -5,7 +5,7 @@ import cv2 as cv
 import pandas as pd
 
 
-# roi range (0,1) and is float32
+# roi range (0,1) and is float32 but we convert to int and range (0,255)
 def feature_extraction_method(rois, argument):
     """
 
