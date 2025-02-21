@@ -4,6 +4,7 @@ from classification_methods.classification import perform_classification
 import pandas as pd
 import seaborn as sns
 
+
 def plot_all_classifier_performance(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag=False):
     """
     Plot accuracy and F1 score for each classifier for 5 different tasks with value labels on bars
@@ -22,11 +23,9 @@ def plot_all_classifier_performance(selected_feature, max_no_of_rois, gentl_resu
     index = np.arange(len(classifiers))
 
     # Define tasks
-    tasks = ["cancer_invasion", "cancer_vs_non_cancerous", "cancer_stage",
+
+    tasks = ["cancer_invasion", "cancer_stage",
              "cancer_early_vs_late_stage", "ptc_vs_mibc"]
-    if gentl_flag:  # if gentl_flag is True, remove cancer_vs_non_cancerous
-        tasks = ["cancer_invasion", "cancer_stage",
-                 "cancer_early_vs_late_stage", "ptc_vs_mibc"]
     # Create a figure with a grid layout
     fig, axes = plt.subplots(2, 2, figsize=(16, 16)) if gentl_flag else plt.subplots(3, 2, figsize=(20, 20))
 
@@ -167,10 +166,10 @@ def plot_performance_across_all_task(selected_feature, max_no_of_rois):
     # Adjust layout to ensure no overlap
     plt.tight_layout(rect=[0, 0, 1, 0.92])  # Reserve space for the title and legend
 
-    # plt.savefig(
-    #     f"./Results/{max_no_of_rois}/task_wise/classifier_performance_{selected_feature}_{max_no_of_rois}_full.pdf",
-    #     format="pdf"
-    #     )
+    plt.savefig(
+        f"./Results/{max_no_of_rois}/task_wise/classifier_performance_{selected_feature}_{max_no_of_rois}_full.pdf",
+        format="pdf"
+        )
 
     # plt.show()
 
@@ -354,7 +353,6 @@ def plot_performance_across_all_rois(selected_feature):
         plt.show()
 
 
-
 if __name__ == "__main__":
     gentl_result_param_list = ["average_best_absolute_distance_results", "average_generation_absolute_distance_results",
                                "average_mean_absolute_distance_results"]
@@ -365,16 +363,20 @@ if __name__ == "__main__":
     only_f1_score_all_task = True  # to plot f1 score across tasks
     only_f1_score_roi_set = False  # a single plot for 10,20,30,40 and 50 rois
     if only_f1_score_roi_set:
-        plot_performance_across_all_rois(selected_feature=glcm_features_list[4])
+        plot_performance_across_all_rois(selected_feature=glcm_features_list[0])
     elif only_f1_score_all_task:  # to plot f1 score across all the task in 1 plot
-        plot_performance_across_all_task(
-            selected_feature=glcm_features_list[4], max_no_of_rois=roi_list[4]
-            )
+        for j in range(1, 5):
+            for i in range(0, 5):
+                plot_performance_across_all_task(
+                    selected_feature=glcm_features_list[j], max_no_of_rois=roi_list[i]
+                    )
     else:  # to plot performance accuracy and f1 score task wise
-        plot_all_classifier_performance(
-            selected_feature=glcm_features_list[1], max_no_of_rois=roi_list[0],
-            gentl_result_param=gentl_result_param_list[2], gentl_flag=gentl_flag
-            )
+        for j in range(0, 5):
+            for i in range(0, 3):
+                plot_all_classifier_performance(
+                    selected_feature=glcm_features_list[j], max_no_of_rois=roi_list[4],
+                    gentl_result_param=gentl_result_param_list[i], gentl_flag=gentl_flag
+                    )
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=20)
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=30)
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=40)

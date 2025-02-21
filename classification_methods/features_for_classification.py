@@ -114,7 +114,7 @@ def get_features_by_invasion(selected_feature, max_no_of_rois, gentl_result_para
     return Dataframe_cancer_with_stages
 
 
-def get_features_by_stage(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
+def get_features_by_stage(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
     """
     Merge cancer features to include label for different stages
 
@@ -157,7 +157,7 @@ def get_all_features(selected_feature, max_no_of_rois):
     return full_features_dataframe
 
 
-def get_early_late_stage_features(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
+def get_early_late_stage_features(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
     if gentl_flag:
         cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
     else:
@@ -176,7 +176,7 @@ def get_early_late_stage_features(selected_feature, max_no_of_rois,gentl_result_
     return Dataframe_cancer_with_stages
 
 
-def get_features_ptc_vs_mibc(selected_feature, max_no_of_rois,gentl_result_param, gentl_flag):
+def get_features_ptc_vs_mibc(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
     """
     Retrieves features for Post-Treatment Changes (PTC) [T0] versus Muscle-Invasive Bladder Cancer (MIBC) [T2,T3,T4]
 
@@ -235,9 +235,7 @@ def filter_T0_based_on_flag(features_dataframe, filter_flag=True, ):
 
 
 def get_tasks():
-    tasks = ["Classification of cancer invasion - NMIBC vs MIBC ", "Classification of lesion vs control",
-             "Classification of cancer stages - TA vs Tis vs T1 vs T2 vs T3 vs T4",
-             "Classification of early vs late stage", "Classification of post treatment changes vs MIBC"]
+    tasks = ["cancer_invasion", "cancer_vs_non_cancerous", "cancer_stage", "early_vs_late_stage", "ptc_vs_mibc"]
     return tasks
 
 # if __name__ == "__main__":
