@@ -103,18 +103,49 @@ def perform_classification(selected_feature, max_no_of_rois, gentl_result_param,
         "ptc_vs_mibc": {}
         }
 
+    precision_dict = {
+        "cancer_invasion": {},
+        "cancer_stage": {},
+        "cancer_early_vs_late_stage": {},
+        "ptc_vs_mibc": {}
+        }
+
+    recall_dict = {
+        "cancer_invasion": {},
+        "cancer_stage": {},
+        "cancer_early_vs_late_stage": {},
+        "ptc_vs_mibc": {}
+        }
+    specificity_dict = {
+        "cancer_invasion": {},
+        "cancer_stage": {},
+        "cancer_early_vs_late_stage": {},
+        "ptc_vs_mibc": {}
+        }
+
     # Loop through classifiers and tasks
     for method in classifier_list:
         for task, func in classifier_methods[method].items():
             # Call the function and store test accuracy and test f1 score results - use last two
-            acc, f1_score, _, _ = func(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag)
-            accuracy_dict[task][method] = float(round(acc, 2))
-            f1_score_dict[task][method] = float(round(f1_score, 2))
+            scores = func(
+                selected_feature, max_no_of_rois, gentl_result_param, gentl_flag
+                )
+            accuracy_dict[task][method] = float(round(scores['accuracy'], 2))
+            f1_score_dict[task][method] = float(round(scores['f1'], 2))
+            precision_dict[task][method] = float(round(scores['precision'], 2))
+            recall_dict[task][method] = float(round(scores['sensitivity'], 2))
+            specificity_dict[task][method] = float(round(scores['specificity'], 2))
 
     # Print results
     for task in accuracy_dict:
-        print(f"Task: {task}")
+        print(f"Task: {task} - Selected Feature: {selected_feature} - Max ROI {max_no_of_rois}")
+        if gentl_flag:
+            print(f"Gentl feature {gentl_result_param}")
         print(f"Accuracy: {accuracy_dict[task]}")
         print(f"F1 Score: {f1_score_dict[task]}")
+        print(f"Precision: {precision_dict[task]}")
+        print(f"Recall: {recall_dict[task]}")
+        print(f"Specificity: {specificity_dict[task]}")
+        print()
 
     return accuracy_dict, f1_score_dict

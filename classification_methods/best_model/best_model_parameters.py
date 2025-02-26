@@ -1,5 +1,9 @@
+import numpy as np
 import pandas as pd
 import os
+
+from sklearn.metrics import confusion_matrix, make_scorer, recall_score
+from sklearn.model_selection import cross_validate
 
 
 def load_best_params(classification_type, glcm_feature, max_no_of_rois, additional_feature, gentl_flag, file_name):
@@ -48,7 +52,8 @@ def load_best_params(classification_type, glcm_feature, max_no_of_rois, addition
     return best_params
 
 
-def append_hyperparams_to_csv(classifier, task, selected_feature, max_no_of_rois, gentl_result_param, gentl_flag,best_params, file_name):
+def append_hyperparams_to_csv(classifier, task, selected_feature, max_no_of_rois, gentl_result_param, gentl_flag,
+                              best_params, file_name):
     """
     Appends hyperparameter tuning results to a CSV file based on the model type.
     """
@@ -83,10 +88,18 @@ def append_hyperparams_to_csv(classifier, task, selected_feature, max_no_of_rois
             "classification_type": task,
             "glcm_feature": selected_feature,
             "additional_feature": gentl_result_param if gentl_flag else "",
-            "C": best_params.get("logreg__estimator__C", "") if task == "cancer_stage" else best_params.get("logreg__C", ""),
-            "max_iter": best_params.get("logreg__estimator__max_iter", "") if task == "cancer_stage" else best_params.get("logreg__max_iter", ""),
-            "penalty": best_params.get("logreg__estimator__penalty", "") if task == "cancer_stage" else best_params.get("logreg__penalty", ""),
-            "solver": best_params.get("logreg__estimator__solver", "") if task == "cancer_stage" else best_params.get("logreg__solver", ""),
+            "C": best_params.get("logreg__estimator__C", "") if task == "cancer_stage" else best_params.get(
+                "logreg__C", ""
+                ),
+            "max_iter": best_params.get(
+                "logreg__estimator__max_iter", ""
+                ) if task == "cancer_stage" else best_params.get("logreg__max_iter", ""),
+            "penalty": best_params.get("logreg__estimator__penalty", "") if task == "cancer_stage" else best_params.get(
+                "logreg__penalty", ""
+                ),
+            "solver": best_params.get("logreg__estimator__solver", "") if task == "cancer_stage" else best_params.get(
+                "logreg__solver", ""
+                ),
             "max_no_of_rois": max_no_of_rois
             }
     elif classifier == "lda":
@@ -130,3 +143,136 @@ def append_hyperparams_to_csv(classifier, task, selected_feature, max_no_of_rois
     print(f"Hyperparameter tuning results for {classifier.upper()} appended successfully.")
 
 
+def append_classification_score_to_csv(classifier, selected_feature, max_no_of_rois, gentl_flag, gentl_result_param,
+                                       results, task):
+    """
+
+    Args:
+        task:
+        classifier:
+        selected_feature:
+        max_no_of_rois:
+        gentl_flag:
+        gentl_result_param:
+        results:
+    """
+    new_row = {
+        'classifier': classifier,
+        "classification_type": task,
+        'feature': selected_feature,
+        'max_ROI': max_no_of_rois,
+        'gentl_result_param': gentl_result_param if gentl_flag else "",
+        'accuracy': round(results['accuracy'], 2),
+        'f1_score': round(results['f1'], 2),
+        'precision': round(results['precision'], 2),
+        'sensitivity': round(results['sensitivity'], 2),
+        'specificity': round(results['specificity'], 2)
+        }
+
+    csv_filename = "classification_performance_results.csv"
+    file_path = os.path.join("best_model", csv_filename)
+    pd.DataFrame([new_row]).to_csv(file_path, mode='a', header=False, index=False)
+
+
+def specificity_score_multiclass(y_true, y_pred, num_classes, average='weighted'):
+    """
+    Computes the specificity for each class in a multi-class classification problem.
+
+    Args:
+        y_true (array-like): Ground truth (actual) labels for each sample.
+        y_pred (array-like): Predicted labels for each sample.
+        num_classes (int): The number of classes.
+        average (str): Aggregation method ('weighted' or 'macro').
+
+    Returns:
+        float: The averaged specificity score across all classes.
+    """
+    specificity_scores = []
+
+    for i in range(num_classes):
+        tn = np.sum((y_true != i) & (y_pred != i))  # True negatives for class i
+        fp = np.sum((y_true != i) & (y_pred == i))  # False positives for class i
+
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        specificity_scores.append(specificity)
+
+    # Compute the final score based on the chosen averaging method
+    if average == 'weighted':
+        class_counts = np.bincount(y_true, minlength=num_classes)  # Handle missing classes
+        weighted_specificity = np.dot(specificity_scores, class_counts) / np.sum(class_counts)
+        return weighted_specificity
+    elif average == 'macro':
+        return np.mean(specificity_scores)  # Simple unweighted average
+    else:
+        raise ValueError("Invalid value for 'average'. Choose 'macro' or 'weighted'.")
+
+
+def specificity_score(y_true, y_pred):
+    """
+    Computes the specificity (True Negative Rate) of a classification model.
+
+    Specificity is defined as the proportion of actual negatives (TN) that are correctly identified:
+        Specificity = TN / (TN + FP)
+
+    Args:
+        y_true (array-like): Ground truth (actual) binary labels (0 or 1).
+        y_pred (array-like): Predicted binary labels (0 or 1) from the classifier.
+
+    Returns:
+        float: The specificity score, ranging from 0 to 1. If there are no negative samples, returns 0.
+    """
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    return tn / (tn + fp) if (tn + fp) > 0 else 0
+
+
+def model_evaluation(classifier, selected_feature, max_no_of_rois, gentl_flag, gentl_result_param, task, model, X, y,
+                     skf):
+    """
+    Compute and store accuracy, f1 score, precision, sensitivity, specificity.
+
+    Args:
+        classifier:
+        selected_feature:
+        max_no_of_rois:
+        gentl_flag:
+        gentl_result_param:
+        task:
+        model:
+        X:
+        y:
+        skf:
+
+    Returns:
+
+    """
+    if task == "cancer_stage":
+        scoring = {
+            'accuracy': 'accuracy',
+            'f1_macro': 'f1_macro',
+            'precision_macro': 'precision_macro',
+            'recall_macro': 'recall_macro',
+            'specificity': make_scorer(specificity_score_multiclass, num_classes=6, average="macro")
+            }
+    else:
+        scoring = {
+            'accuracy': 'accuracy',
+            'f1_macro': 'f1_macro',
+            'precision_macro': 'precision_macro',
+            'recall_macro': 'recall_macro',
+            'specificity': make_scorer(recall_score, pos_label=0)
+            }
+
+    scores = cross_validate(model, X, y, cv=skf, scoring=scoring)
+
+    results = {
+        'accuracy': np.mean(scores['test_accuracy']) * 100,
+        'f1': np.mean(scores['test_f1_macro']) * 100,
+        'precision': np.mean(scores['test_precision_macro']) * 100,
+        'sensitivity': np.mean(scores['test_recall_macro']) * 100,
+        'specificity': np.mean(scores['test_specificity']) * 100
+        }
+    # if classifier == "lda" or classifier == "dt" or classifier == "rf":
+    #     append_classification_score_to_csv(
+    #         classifier, selected_feature, max_no_of_rois, gentl_flag, gentl_result_param,
+    #         results, task)
+    return results

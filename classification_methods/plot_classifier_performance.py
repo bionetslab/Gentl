@@ -345,12 +345,12 @@ def plot_performance_across_all_rois(selected_feature):
         g.fig.patch.set_facecolor('white')  # Ensure the figure has a clean white background
 
         # Save plot to file
-        filename = f"{task.replace('_', ' ').title().replace(' ', '_').lower()}_{selected_feature.lower()}_performance.pdf"
+        filename = f"new_results/{task.replace('_', ' ').title().replace(' ', '_').lower()}_{selected_feature.lower()}_performance.pdf"
         g.savefig(filename, format="pdf")
         print(f"Plot saved as {filename}")
 
         # Show plot
-        plt.show()
+        # plt.show()
 
 
 if __name__ == "__main__":
@@ -363,9 +363,10 @@ if __name__ == "__main__":
     only_f1_score_all_task = True  # to plot f1 score across tasks
     only_f1_score_roi_set = False  # a single plot for 10,20,30,40 and 50 rois
     if only_f1_score_roi_set:
-        plot_performance_across_all_rois(selected_feature=glcm_features_list[0])
+        for j in range(0, 5):
+            plot_performance_across_all_rois(selected_feature=glcm_features_list[j])
     elif only_f1_score_all_task:  # to plot f1 score across all the task in 1 plot
-        for j in range(1, 5):
+        for j in range(0, 1):
             for i in range(0, 5):
                 plot_performance_across_all_task(
                     selected_feature=glcm_features_list[j], max_no_of_rois=roi_list[i]
@@ -374,7 +375,7 @@ if __name__ == "__main__":
         for j in range(0, 5):
             for i in range(0, 3):
                 plot_all_classifier_performance(
-                    selected_feature=glcm_features_list[j], max_no_of_rois=roi_list[4],
+                    selected_feature=glcm_features_list[j], max_no_of_rois=roi_list[0],
                     gentl_result_param=gentl_result_param_list[i], gentl_flag=gentl_flag
                     )
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=20)

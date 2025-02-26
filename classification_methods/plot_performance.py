@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from matplotlib import pyplot as plt
 from sympy.printing.pretty.pretty_symbology import line_width
@@ -31,7 +33,7 @@ def plot_performance_task_wise(selected_feature, max_no_of_rois):
     group_spacing = 0.3  # Add extra space between bar groups for separate tasks
 
     # Define tasks
-    tasks = ["cancer_early_vs_late_stage"]
+    tasks = ["ptc_vs_mibc"]
     # Create a figure with a grid layout
     fig, axes = plt.subplots(1, 1, figsize=(9, 4))
 
@@ -81,10 +83,10 @@ def plot_performance_task_wise(selected_feature, max_no_of_rois):
     # Adjust layout to ensure no overlap
     plt.tight_layout(rect=[0, 0, 1, 0.92])  # Reserve space for the title and legend
 
-    # plt.savefig(
-    #     f"./Results/{tasks[0]}.pdf",
-    #     format="pdf"
-    #     )
+    plt.savefig(
+        f"./Results/{tasks[0]}.pdf",
+        format="pdf"
+        )
 
     # plt.show()
 
@@ -270,6 +272,94 @@ def plot_performance_across_all_rois(selected_feature):
         # plt.show()
 
 
+def plot_performance_across_all_glcm_features(max_no_of_rois, gentl_result_param):
+    """
+    Plot F1 scores across all GLCM features for each classifier using a selected GenTL result.
+
+    :param max_no_of_rois: Number of ROIs per image
+    :param gentl_algo_result_param: Selected GenTL result parameter
+    """
+    # Define all GLCM features (you need to specify them)
+    glcm_features = ["dissimilarity", "correlation", "energy", "homogeneity", "contrast"]  # Add more if needed
+
+    # Store F1 scores for all features
+    f1_score_all_features_dict = {}
+
+    # Loop over each GLCM feature
+    for feature in glcm_features:
+        _, f1_score_glcm_dict = perform_classification(
+            feature, max_no_of_rois, gentl_result_param, gentl_flag=True
+            )
+        f1_score_all_features_dict[feature] = f1_score_glcm_dict
+
+    classifiers = list(f1_score_all_features_dict[glcm_features[0]]["cancer_invasion"].keys())
+
+    # Define tasks
+    tasks = ["cancer_invasion", "cancer_stage", "cancer_early_vs_late_stage", "ptc_vs_mibc"]
+
+    # Create a figure with a grid layout
+    fig, axes = plt.subplots(len(tasks), 1, figsize=(12, 18))
+    fig.suptitle(
+        f"Classifier Performance Across All GLCM Features for {gentl_result_param} \n Max ROIs: {max_no_of_rois}",
+        fontsize=16, fontweight='bold', y=0.98
+        )  # Main title for the plot
+
+    # Flatten axes for easier indexing
+    axes = np.ravel(axes)
+
+    width = 0.15  # Width of bars
+    colors = plt.cm.tab10.colors  # Use Matplotlib colormap
+
+    # Loop through tasks and plot in their respective subplots
+    for i, task in enumerate(tasks):
+        ax = axes[i]
+        feature_wise_f1_values_dict = {}
+
+        for feature in glcm_features:
+            feature_wise_f1_values_dict[feature] = [
+                f1_score_all_features_dict[feature][task][classifier] for classifier in classifiers
+                ]
+
+        x = np.arange(len(classifiers))  # X-axis locations
+        multiplier = 0
+
+        for feature, values in feature_wise_f1_values_dict.items():
+            offset = width * multiplier
+            rects = ax.bar(x + offset, values, width, label=feature, color=colors[multiplier % len(colors)])
+            ax.bar_label(rects, fontsize=8, padding=3, rotation=90, fmt="%.2f")
+            multiplier += 1
+
+        # Add task-specific title and labels
+        ax.set_title(task.replace("_", " ").title(), fontsize=12, fontweight='bold')
+        ax.set_xticks(x + (width * (multiplier - 1) / 2), classifiers)
+        ax.set_ylabel("F1 Score %")
+        ax.set_ylim(0, max(1.0, ax.get_ylim()[1] * 1.15))  # Prevent scaling issues
+
+    # Add a single legend below the title but above the subplots
+    fig.legend(
+        labels=glcm_features,
+        loc="upper center",
+        fontsize=12,
+        ncol=5,
+        bbox_to_anchor=(0.5, 0.92)
+        )
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
+
+    # Ensure the save directory exists
+    save_path = f"./Results/{max_no_of_rois}/glcm_features/"
+    os.makedirs(save_path, exist_ok=True)
+
+    # Save the plot
+    plt.savefig(
+        f"{save_path}classifier_performance_across_glcm_features_{max_no_of_rois}_{gentl_result_param}.pdf",
+        format="pdf"
+        )
+
+    # plt.show()
+
+
 if __name__ == "__main__":
     gentl_result_param_list = ["average_best_absolute_distance_results", "average_generation_absolute_distance_results",
                                "average_mean_absolute_distance_results"]
@@ -279,17 +369,19 @@ if __name__ == "__main__":
     gentl_flag = True  #
     only_f1_score_all_task = True # to plot f1 score across tasks
     only_f1_score_roi_set = False # a single plot for 10,20,30,40 and 50 rois
-    if only_f1_score_roi_set:
-        plot_performance_across_all_rois(selected_feature=glcm_features_list[4])
-    elif only_f1_score_all_task:  # to plot f1 score across all the task in 1 plot
-        plot_performance_task_wise(
-            selected_feature=glcm_features_list[4], max_no_of_rois=roi_list[0]
-            )
-    else:  # to plot performance accuracy and f1 score task wise
-        plot_all_classifier_performance(
-            selected_feature=glcm_features_list[1], max_no_of_rois=roi_list[0],
-            gentl_result_param=gentl_result_param_list[2], gentl_flag=gentl_flag
-            )
+    for i in range(0,5):
+        plot_performance_across_all_glcm_features(max_no_of_rois=roi_list[i], gentl_result_param=gentl_result_param_list[2])
+    # if only_f1_score_roi_set:
+    #     plot_performance_across_all_rois(selected_feature=glcm_features_list[4])
+    # elif only_f1_score_all_task:  # to plot f1 score across all the task in 1 plot
+    #     plot_performance_task_wise(
+    #         selected_feature=glcm_features_list[3], max_no_of_rois=roi_list[1]
+    #         )
+    # else:  # to plot performance accuracy and f1 score task wise
+    #     plot_all_classifier_performance(
+    #         selected_feature=glcm_features_list[1], max_no_of_rois=roi_list[0],
+    #         gentl_result_param=gentl_result_param_list[2], gentl_flag=gentl_flag
+    #         )
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=20)
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=30)
     # plot_all_classifier_performance(selected_feature="contrast", max_no_of_rois=40)
