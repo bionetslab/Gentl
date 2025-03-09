@@ -1,0 +1,25 @@
+Feature,Classifier,Accuracy,F1-score,Precision,Sensitivity,Specificity
+dissimilarity,LR,60.0,54.17,61.45,57.67,53.33
+dissimilarity,SVM,72.31,68.2,70.34,75.0,80.0
+dissimilarity,KNN,76.92,66.57,67.18,66.33,46.67
+dissimilarity,DT,80.0,71.62,75.22,73.0,60.0
+dissimilarity,RF,81.54,70.85,79.33,69.33,46.67
+dissimilarity,LDA,72.31,53.69,57.54,54.0,20.0
+Average best distance,LR,58.46,51.2,53.52,54.33,46.67
+Average best distance,SVM,61.54,53.72,56.05,56.33,46.67
+Average best distance,KNN,66.15,52.56,53.48,54.67,33.33
+Average best distance,DT,69.23,53.65,53.63,54.33,26.67
+Average best distance,RF,66.15,54.63,55.63,54.67,33.33
+Average best distance,LDA,76.92,43.48,38.46,50.0,0.0
+Average mean distance,LR,61.54,54.98,56.4,58.67,53.33
+Average mean distance,SVM,66.15,57.79,64.27,59.33,46.67
+Average mean distance,KNN,73.85,55.89,55.15,57.33,26.67
+Average mean distance,DT,56.92,46.87,49.68,48.67,33.33
+Average mean distance,RF,58.46,50.94,54.93,54.33,46.67
+Average mean distance,LDA,76.92,43.48,38.46,50.0,0.0
+Average generation,LR,63.08,54.86,56.11,57.33,46.67
+Average generation,SVM,67.69,58.59,60.52,60.33,46.67
+Average generation,KNN,75.38,58.44,65.97,58.33,26.67
+Average generation,DT,69.23,56.98,58.53,56.67,33.33
+Average generation,RF,67.69,58.41,59.45,60.33,46.67
+Average generation,LDA,76.92,43.48,38.46,50.0,0.0
