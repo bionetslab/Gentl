@@ -24,6 +24,16 @@ def get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_p
 
 
 def get_features_from_csv(selected_feature, max_no_of_rois):
+    """
+        Fetch the required features for classification
+    Args:
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
+    Returns:
+        cancer_features_df: cancer features as dataframe
+        healthy_features_df: healthy features as dataframe
+    """
     max_no_of_rois = max_no_of_rois  # can be set to 10,20,30,40,50
     selected_feature = selected_feature  # [dissimilarity,correlation,energy,contrast,homogeneity]
     features_per_roi = 20  # 20 dissimilarity features per roi
@@ -95,9 +105,16 @@ def get_features_by_invasion(selected_feature, max_no_of_rois, gentl_result_para
     """
     Merge cancer features to include label for NMIBC(0) {Ta,Tis,T1} and MIBC(1) {T2,T3,T4}
 
+    Args:
+        gentl_flag: true if genetic algorithm based features are used
+        gentl_result_param: best distance, mean distance, maximum generation
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
     Returns:
     Dataframe_cancer_with_types: A dataframe with patient IDs,
      cancer features, and binary cancer type labels (0 for NMIBC, 1 for MIBC).
+
     """
     # -------------------NMIBC Vs MIBC----------------------
     if gentl_flag:
@@ -118,8 +135,15 @@ def get_features_by_stage(selected_feature, max_no_of_rois, gentl_result_param, 
     """
     Merge cancer features to include label for different stages
 
+    Args:
+        gentl_flag: true if genetic algorithm based features are used
+        gentl_result_param: best distance, mean distance, maximum generation
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
     Returns:
     Dataframe_cancer_with_types: A dataframe with patient IDs, cancer features, and label for cancer stage.
+
     """
     # -------------------T0 Vs Ta Vs Tis Vs T1 Vs T2 Vs T3 Vs T4----------------------
     if gentl_flag:
@@ -143,6 +167,10 @@ def get_all_features(selected_feature, max_no_of_rois):
     """
     Merge cancer features(Ta,Tis,T1,T2,T3,T4) and healthy features (T0,Ta,Tis,T1,T2,T3,T4)
 
+    Args:
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
     Returns:
     Dataframe_cancer_with_types: A dataframe with patient IDs, cancer and healthy features with labels
     """
@@ -158,6 +186,18 @@ def get_all_features(selected_feature, max_no_of_rois):
 
 
 def get_early_late_stage_features(selected_feature, max_no_of_rois, gentl_result_param, gentl_flag):
+    """
+    Merge cancer features to include label for early versus late stages
+
+    Args:
+        gentl_flag: true if genetic algorithm based features are used
+        gentl_result_param: best distance, mean distance, maximum generation
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
+    Returns:
+    Dataframe_cancer_with_types: A dataframe with patient IDs, cancer and healthy features with labels
+    """
     if gentl_flag:
         cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
     else:
@@ -180,6 +220,14 @@ def get_features_ptc_vs_mibc(selected_feature, max_no_of_rois, gentl_result_para
     """
     Retrieves features for Post-Treatment Changes (PTC) [T0] versus Muscle-Invasive Bladder Cancer (MIBC) [T2,T3,T4]
 
+    Args:
+        gentl_flag: true if genetic algorithm based features are used
+        gentl_result_param: best distance, mean distance, maximum generation
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
+    Returns:
+    Dataframe_cancer_with_types: A dataframe with patient IDs, cancer and healthy features with labels
     """
     if gentl_flag:
         cancer_features_df = get_gentl_features_from_csv(selected_feature, max_no_of_rois, gentl_result_param)
@@ -235,7 +283,12 @@ def filter_T0_based_on_flag(features_dataframe, filter_flag=True, ):
 
 
 def get_tasks():
-    tasks = ["cancer_invasion", "cancer_vs_non_cancerous", "cancer_stage", "early_vs_late_stage", "ptc_vs_mibc"]
+    """
+    Method to get the list of classification task
+    Returns: list of classification tasks
+
+    """
+    tasks = ["cancer_invasion", "cancer_stage", "early_vs_late_stage", "ptc_vs_mibc"]
     return tasks
 
 # if __name__ == "__main__":

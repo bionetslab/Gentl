@@ -59,13 +59,6 @@ def classify_cancer_invasion(selected_feature, max_no_of_rois, gentl_result_para
     scores = model_evaluation(
         "knn", selected_feature, max_no_of_rois, gentl_flag, gentl_result_param, task, model, X, y, skf
         )
-    # Perform cross-validation and compute scores
-    accuracy_scores = cross_val_score(model, X, y, cv=skf, scoring='accuracy')
-    f1_scores = cross_val_score(model, X, y, cv=skf, scoring='f1_macro')
-
-    # Compute average cross-validation scores
-    avg_accuracy = np.mean(accuracy_scores) * 100
-    avg_f1 = np.mean(f1_scores) * 100
 
     return scores
 
@@ -83,7 +76,7 @@ def classify_cancer_stage(selected_feature, max_no_of_rois, gentl_result_param, 
         Accuracy and f1 score
     """
 
-    task = get_tasks()[2]
+    task = get_tasks()[1]
     Dataframe_cancer_with_types = get_features_by_stage(
         selected_feature, max_no_of_rois, gentl_result_param, gentl_flag
         )
@@ -118,13 +111,6 @@ def classify_cancer_stage(selected_feature, max_no_of_rois, gentl_result_param, 
     scores = model_evaluation(
         "knn", selected_feature, max_no_of_rois, gentl_flag, gentl_result_param, task ,model, X, y, skf
         )
-    # Perform cross-validation and compute scores
-    accuracy_scores = cross_val_score(model, X, y, cv=skf, scoring='accuracy')
-    f1_scores = cross_val_score(model, X, y, cv=skf, scoring='f1_macro')
-
-    # Compute average cross-validation scores
-    avg_accuracy = np.mean(accuracy_scores) * 100
-    avg_f1 = np.mean(f1_scores) * 100
 
     return scores
 
@@ -141,7 +127,7 @@ def classify_early_vs_late_stage(selected_feature, max_no_of_rois, gentl_result_
     Returns:
         Accuracy and f1 score
     """
-    task = get_tasks()[3]
+    task = get_tasks()[2]
     Dataframe_cancer_with_stages = get_early_late_stage_features(
         selected_feature, max_no_of_rois, gentl_result_param, gentl_flag
         )
@@ -176,13 +162,6 @@ def classify_early_vs_late_stage(selected_feature, max_no_of_rois, gentl_result_
     scores = model_evaluation(
         "knn", selected_feature, max_no_of_rois, gentl_flag, gentl_result_param, task ,model, X, y, skf
         )
-    # Perform cross-validation and compute scores
-    accuracy_scores = cross_val_score(model, X, y, cv=skf, scoring='accuracy')
-    f1_scores = cross_val_score(model, X, y, cv=skf, scoring='f1_macro')
-
-    # Compute average cross-validation scores
-    avg_accuracy = np.mean(accuracy_scores) * 100
-    avg_f1 = np.mean(f1_scores) * 100
 
     return scores
 
@@ -200,7 +179,7 @@ def classify_ptc_vs_mibc(selected_feature, max_no_of_rois, gentl_result_param, g
         Accuracy and f1 score
     """
 
-    task = get_tasks()[4]
+    task = get_tasks()[3]
     Dataframe_cancer_with_stages = get_features_ptc_vs_mibc(
         selected_feature, max_no_of_rois, gentl_result_param, gentl_flag
         )
@@ -235,13 +214,6 @@ def classify_ptc_vs_mibc(selected_feature, max_no_of_rois, gentl_result_param, g
     scores = model_evaluation(
         "knn", selected_feature, max_no_of_rois, gentl_flag, gentl_result_param, task,model, X, y, skf
         )
-    # Perform cross-validation and compute scores
-    accuracy_scores = cross_val_score(model, X, y, cv=skf, scoring='accuracy')
-    f1_scores = cross_val_score(model, X, y, cv=skf, scoring='f1_macro')
-
-    # Compute average cross-validation scores
-    avg_accuracy = np.mean(accuracy_scores) * 100
-    avg_f1 = np.mean(f1_scores) * 100
 
     return scores
 

@@ -1,17 +1,15 @@
 import os
 from ast import literal_eval
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.spatial import Delaunay
 from sklearn.neighbors import KDTree
 
 
 def extract_non_cancer_rois(neighbor_parm, ct_folder, image, mask, out_boundary, roi_width, roi_height, overlap,
                             max_rois=None):
     """
-    Extract non-cancer ROIs from the image with specified overlap.
+    Extract healthy ROIs from the image with specified overlap.
 
     Arguments:
     neighbor_parm: Specifies the method for determining neighbors of (ROIs)
@@ -112,72 +110,6 @@ def extract_cancer_roi(image, mask):
     return cancer_roi, bbox
 
 
-class BladderCancerROIVisualizer:
-    @staticmethod
-    def visualize_single_roi(roi_sample):
-        """
-        Visualize a single ROI sample.
-
-        Args:
-        roi_sample (dict): A dictionary containing ROI data and metadata.
-        """
-        roi = roi_sample['image'].squeeze().numpy()
-
-        plt.figure(figsize=(8, 8))
-        plt.imshow(roi, cmap='gray')
-        plt.title(f"ROI\n{roi_sample['time_point']} - {roi_sample['ct_folder']} - {roi_sample['case_type']}")
-        plt.axis('off')
-        plt.show()
-
-    @staticmethod
-    def visualize_roi_batch(batch, num_samples=4):
-        """
-        Visualize a batch of ROI samples.
-
-        Args:
-        batch (dict): A batch of ROI samples.
-        num_samples (int): Number of samples to visualize from the batch.
-        """
-        batch_size = batch['image'].shape[0]
-        num_samples = min(num_samples, batch_size)
-
-        fig, axes = plt.subplots(1, num_samples, figsize=(4 * num_samples, 4))
-
-        for i in range(num_samples):
-            roi = batch['image'][i].squeeze().numpy()
-
-            axes[i].imshow(roi, cmap='gray')
-            axes[i].set_title(f"{batch['time_point'][i]}\n{batch['ct_folder'][i]}\n{batch['case_type'][i]}")
-            axes[i].axis('off')
-
-        plt.tight_layout()
-        plt.show()
-
-    @staticmethod
-    def visualize_dataset(dataset, num_samples=4):
-        """
-        Visualize random samples from the dataset.
-
-        Args:
-        dataset (BladderCancerROIDataset): The ROI dataset.
-        num_samples (int): Number of random samples to visualize.
-        """
-        indices = np.random.choice(len(dataset), num_samples, replace=False)
-
-        fig, axes = plt.subplots(1, num_samples, figsize=(4 * num_samples, 4))
-
-        for i, idx in enumerate(indices):
-            sample = dataset[idx]
-            roi = sample['image'].squeeze().numpy()
-
-            axes[i].imshow(roi, cmap='gray')
-            axes[i].set_title(f"{sample['time_point']}\n{sample['ct_folder']}\n{sample['case_type']}")
-            axes[i].axis('off')
-
-        plt.tight_layout()
-        plt.show()
-
-
 def compute_bounding_box(mask):
     """
     Compute the bounding box around the cancer roi given a mask.
@@ -240,11 +172,11 @@ def compute_neighbors(locations, cancer_roi=False):
 
 def get_coordinates_from_csv(ct_folder, query):
     """
-    From the csv file return x,y,width,height of bounding rectangular area within each image to extract features
+    From the csv file return x,y,width,height of bounding rectangular area for the bladder region within the entire CT scan
 
     Arguments:
     ct_folder: patient_id or filename
-    query (string): outer_rect_coordinates or inner_rect_coordinates for roi selection
+    query (string): bladder region for roi selection
 
     Returns:
     cod (tuple): x,y,width,height of rectangular area
@@ -303,7 +235,7 @@ def distance_threshold(locations, cancer_roi=False):
 
 def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     """
-    Visualizes a non-cancerous regions with bounding boxes on a grayscale image and saves it to a file.
+    Visualizes and store healthy ROIs with bounding boxes on a grayscale image and saves it to a file.
 
     Arguments:
     - image: 2D array-like grayscale image.
@@ -346,16 +278,3 @@ def visualize_and_store_non_cancerous_region(image, bbox, ct_folder):
     # close the figure
     plt.close(fig)
 
-
-def compute_delaunay_triangulation(locations, cancer_roi=False):
-    roi_coordinates = [(x, y) for (y, x, _, _) in locations]
-
-    # Pass the coordinates to Delaunay
-    tri = Delaunay(roi_coordinates)
-
-    neighbors_dict = {}
-
-    # Visualize the Delaunay triangulation - tri.simplicies return the indices of the vertex of the trainable
-    plt.triplot([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], tri.simplices)
-    plt.scatter([p[0] for p in roi_coordinates], [p[1] for p in roi_coordinates], color='green')
-    plt.show()

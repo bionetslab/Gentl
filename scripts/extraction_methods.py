@@ -5,12 +5,14 @@ import cv2 as cv
 import pandas as pd
 
 
-# roi range (0,1) and is float32 but we convert to int and range (0,255)
+# roi range (0,1) and is float32, but we convert to int and range (0,255)
 def feature_extraction_method(rois, argument):
     """
+    Performs the specific feature extraction method
 
-    :param rois: both cancer roi and non-cancer roi's corresponding to a single image
+    :param rois: includes both cancer roi and non-cancer roi's corresponding to a single image
     :param argument: specify the method for feature extraction
+
     :return: features corresponding to cancer and non caner roi's for a single image as a list
     """
     roi_features = []
@@ -40,7 +42,7 @@ def feature_extraction_method(rois, argument):
                 roi_features.append(fourier_transform_feature_extraction(roi))
             return roi_features
         case default:
-            return "something"
+            return "other feature extraction method"
 
 
 def hog_feature_extractor(image):
@@ -66,7 +68,7 @@ def hog_feature_extractor(image):
 
 
 def glcm_feature_extractor(roi):
-    """GLCM - range is not between 0 and 1 - no.of features 100 features per image"""
+    """GLCM - range is not between 0 and 1 - no.of features 100 (20*5) features per image"""
     angles = [0, np.pi / 4, np.pi / 2, np.pi * 3 / 4]
     distances = [1, 2, 3, 4, 5]
     # Compute some GLCM properties

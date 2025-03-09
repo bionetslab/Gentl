@@ -39,6 +39,12 @@ def perform_classification(selected_feature, max_no_of_rois, gentl_result_param,
     """
     Performs classification using the classifiers in the list
 
+    Args:
+        gentl_flag: true if genetic algorithm based features are used
+        gentl_result_param: best distance, mean distance, maximum generation
+        selected_feature: glcm feature
+        max_no_of_rois: number of extracted healthy rois per image
+
     Returns:
     accuracy_dict: Accuracy across classifiers
     f1_score_dict: F1 score across classifiers

@@ -55,7 +55,7 @@ def extract_features(selected_method, roi_per_image=10):
             # Create a list starting with the cancer ROI, followed by all non-cancer ROIs for this folder
             """eg:[C_ROI,ROI1,ROI2]"""
             roi_list = cancer_rois_by_folder[folder_name] + non_cancer_rois
-            # Pass this list to the feature extraction method
+            # Pass this ROIs list to the feature extraction method
             features = feature_extraction_method(roi_list, extraction_methods[selected_method])
             feature_results[folder_name] = features
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     max_roi_per_image = 30  # select the number of rois to extract per image
     selected_method = "GLCM"  # select the method for feature extraction
-    extracted_features = extract_features(selected_method, max_roi_per_image)
+    extracted_features = extract_features(selected_method, max_roi_per_image)  # calls the extract features method
     extracted_features_df = pd.DataFrame(extracted_features).T
 
     extracted_features_df = extracted_features_df.rename(columns={0: "cancer"})
@@ -136,8 +136,16 @@ if __name__ == "__main__":
     Contrast = pd.concat(Contrast, axis=0)
     Homogeneity = pd.concat(Homogeneity, axis=0)
     # ---
-    Dissimilarity.to_csv(f"./extracted_glcm_features/{max_roi_per_image}/glcm_dissimilarity_features_{max_roi_per_image}_rois.csv")
-    Correlation.to_csv(f"./extracted_glcm_features/{max_roi_per_image}/glcm_correlation_features_{max_roi_per_image}_rois.csv")
+    Dissimilarity.to_csv(
+        f"./extracted_glcm_features/{max_roi_per_image}/glcm_dissimilarity_features_{max_roi_per_image}_rois.csv"
+        )
+    Correlation.to_csv(
+        f"./extracted_glcm_features/{max_roi_per_image}/glcm_correlation_features_{max_roi_per_image}_rois.csv"
+        )
     Energy.to_csv(f"./extracted_glcm_features/{max_roi_per_image}/glcm_energy_features_{max_roi_per_image}_rois.csv")
-    Contrast.to_csv(f"./extracted_glcm_features/{max_roi_per_image}/glcm_contrast_features_{max_roi_per_image}_rois.csv")
-    Homogeneity.to_csv(f"./extracted_glcm_features/{max_roi_per_image}/glcm_homogeneity_features_{max_roi_per_image}_rois.csv")
+    Contrast.to_csv(
+        f"./extracted_glcm_features/{max_roi_per_image}/glcm_contrast_features_{max_roi_per_image}_rois.csv"
+        )
+    Homogeneity.to_csv(
+        f"./extracted_glcm_features/{max_roi_per_image}/glcm_homogeneity_features_{max_roi_per_image}_rois.csv"
+        )
