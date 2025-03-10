@@ -51,7 +51,7 @@ Data will be made available under reasonable request to the corresponding author
 
 ![github-cancer-roi](github_cancer_roi.png)
 
-## Step 3: Segmenting healthy ROI using sliding window
+## Step 3: Segmenting healthy ROIs using sliding window
 
 ![github-healthy-roi](github_healthy_roi.png)
 
@@ -146,13 +146,13 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 	
 # Installation
 
-Install the dependencies using requirements.txtgi
+Create a virtual environment and install the dependencies using requirements.txt
 ```bash
-conda create --name imaging_heterogeneity_study
-conda activate imaging_heterogeneity_study
-pip install scipy==1.10.1 numpy==1.23.5 squidpy==1.3.0 pandas==1.5.3 scikit-learn==1.2.2
+python -m venv gentlvenv
+gentlvenv\Scripts\activate # Windows
+source gentlvenv/bin/activate # Mac/Linux
+pip install -r requirements.txt
 ```
-*Note:* Additionally, modules *math* and *statistics* were used, however no installation is required as they are provided with Python by default.
 
 <!------------------>
 
