@@ -177,6 +177,7 @@ Using Genetic Algorithm (GA), we compute **three key metrics** to quantify featu
   - Reflects how well the entire population approximates cancer-like features, indicating diversity and convergence quality.
 
 All processed results are stored in the folder: *glcm_bladder_average_gentl_result/*
+
 This folder contains five subfolders, corresponding to experiments with different numbers of healthy ROIs.
 
 # Robustness tests
