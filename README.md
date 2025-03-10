@@ -51,9 +51,13 @@ Data will be made available under reasonable request to the corresponding author
 
 ![github-cancer-roi](github_cancer_roi.png)
 
+<br/>
+
 ## Step 3: Segmenting healthy ROIs using sliding window
 
 ![github-healthy-roi](github_healthy_roi.png)
+
+<br/>
 
 
 # Feature extraction
