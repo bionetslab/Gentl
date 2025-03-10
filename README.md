@@ -176,6 +176,9 @@ Using Genetic Algorithm (GA), we compute **three key metrics** to quantify featu
   The average distance between the whole population and the target (final generation, averaged over 20 runs).  
   - Reflects how well the entire population approximates cancer-like features, indicating diversity and convergence quality.
 
+All processed results are stored in the folder: *glcm_bladder_average_gentl_result/*
+This folder contains five subfolders, corresponding to experiments with different numbers of healthy ROIs.
+
 # Robustness tests
 
 We designed tests to evaluate whether GA remains stable and reliable under different settings:
