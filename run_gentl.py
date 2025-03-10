@@ -238,26 +238,26 @@ def average_mean_distance_results_over_trials(feature_name, feature_df, num_tria
 if __name__ == "__main__":
     # Example of running gentl with any feature
     # You can change this to 'correlation', 'energy', 'contrast', or 'homogeneity'
-    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_dissimilarity_features_50_rois.csv')
-    # feature_name = 'dissimilarity'
+    feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_dissimilarity_features_50_rois.csv')
+    feature_name = 'dissimilarity'
     # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_correlation_features_50_rois.csv')
     # feature_name = 'correlation'
     # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_energy_features_50_rois.csv')
     # feature_name = 'energy'
     # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_contrast_features_50_rois.csv')
     # feature_name = 'contrast'
-    feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_homogeneity_features_50_rois.csv')
-    feature_name = 'homogeneity'
+    # feature_df = pd.read_csv('../Gentl/scripts/extracted_glcm_features/50/glcm_homogeneity_features_50_rois.csv')
+    # feature_name = 'homogeneity'
 
     # Case1.1: Sort and display patients by best distance
-    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=57, alpha=0.05, max_generations=8)
+    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df, Np_cap=27, alpha=0.05, max_generations=4)
     # sorted_by_distance = sort_patients_by_best_distance(optimization_distance_results)
     # print("\nSorted results by best distance between best individual and goal:")
     # for result in sorted_by_distance:
     #     print(f"Patient {result['patient_id']}, Best distance to goal: {result['best_distance']}")
 
     # Case1.2: Sort and display patients by mean distance
-    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df,  Np_cap=57, alpha=0.05, max_generations=4, distance_mode='absolute')
+    # optimization_distance_results = run_gentl_for_feature(feature_name, feature_df,  Np_cap=27, alpha=0.05, max_generations=4, distance_mode='absolute')
     # sorted_results = sorted(optimization_distance_results, key=lambda x: x['mean_distances'][-1])
     # print("\nSorted results by mean distance between best individual and goal:")
     # for result in sorted_results:

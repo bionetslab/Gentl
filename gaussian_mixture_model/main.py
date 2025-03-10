@@ -9,7 +9,7 @@ from test_gmm import test_patient_gmm
 # energy_df = pd.read_csv('../scripts/glcm_energy_features.csv')
 # contrast_df = pd.read_csv('../scripts/glcm_contrast_features.csv')
 # homogeneity_df = pd.read_csv('../scripts/glcm_homogeneity_features.csv')
-dissimilarity_df = pd.read_csv('../scripts/glcm_dissimilarity_features_20_rois.csv')
+dissimilarity_df = pd.read_csv('../scripts/extracted_glcm_features/20/glcm_dissimilarity_features_20_rois.csv')
 
 # Process the variable
 # dissimilarity_results = process_variable_gmm(dissimilarity_df, 'dissimilarity')
@@ -27,5 +27,5 @@ dissimilarity_results = process_variable_gmm(dissimilarity_df, 'dissimilarity')
 # save_results_to_csv(homogeneity_results, 'homogeneity')
 
 # Test a specific patient
-test_patient_gmm('CT-174', dissimilarity_results, 'dissimilarity')
+test_patient_gmm('CT-139', dissimilarity_results, 'dissimilarity')
 # test_patient_gmm('CT-009', dissimilarity_results, 'dissimilarity')
