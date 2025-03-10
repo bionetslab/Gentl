@@ -41,17 +41,17 @@ Data will be made available under reasonable request to the corresponding author
 
 # Data preprocessing
 
-## Segmenting bladder region using ImageJ
+## Step 1: Segmenting bladder region using ImageJ
 
 ![github-imagej-data](github_ImageJ_data.png)
 
 <br/>
 
-## Segmenting cancer ROI using binary mask
+## Step 2: Segmenting cancer ROI using binary mask
 
 ![github-cancer-roi](github_cancer_roi.png)
 
-## Segmenting healthy ROI using sliding window
+## Step 3: Segmenting healthy ROI using sliding window
 
 ![github-healthy-roi](github_healthy_roi.png)
 
@@ -146,7 +146,7 @@ using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac
 	
 # Installation
 
-Install the dependencies using requirements.txt
+Install the dependencies using requirements.txtgi
 ```bash
 conda create --name imaging_heterogeneity_study
 conda activate imaging_heterogeneity_study
