@@ -193,7 +193,7 @@ These tests ensure that GA performs consistently without being overly sensitive 
 
 <!------------------>
 
-# Scalability testing
+# Scalability tests
 
 We analyzed how GA scales when facing larger or more complex feature sets:
 
