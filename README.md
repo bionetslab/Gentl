@@ -60,15 +60,35 @@ Data will be made available under reasonable request to the corresponding author
 <br/>
 
 
-# Feature extraction
+# Feature extraction using Gray level co-occurrence matrix (GLCM)
 
 The following five GLCM features were extracted from the cancer ROI, as well as healthy ROIs from the same patient:
 
 - Dissimilarity
+  - Measures how different neighboring pixel values are.
+  - Assumptions: 
+    - Cancer region – high dissimilarity 
+    - Healthy region – low dissimilarity
 - Correlation
+  - Measures the linear dependency between pixel intensities in a given direction.
+  - Assumptions:
+    - Cancer region – low correlation 
+    - Healthy region – high correlation
 - Energy
+  - Measures texture uniformity or repetition.
+  - Assumptions:
+    - Cancer region – low energy 
+    - Healthy region – high energy
 - Contrast
-- Homogeneity,
+  - Measures the intensity variation between neighboring pixels in an image.
+  - Assumptions:
+    - Cancer region – high contrast 
+    - Healthy region – low contrast
+- Homogeneity
+  - Measures whether neighboring pixels in an image have similar intensity values.
+  - Assumptions:
+    - Cancer region – low homogeneity 
+    - Healthy region – high homogeneity
 
 using $20$ configurations ($4$ angles: $\{0, \frac{\pi}{4}, \frac{\pi}{2}, \frac{3\pi}{4} \}$; $5$ distances: $\{1, 2, 3,4, 5\}$ pixels).
 
